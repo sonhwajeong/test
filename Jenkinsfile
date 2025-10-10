@@ -130,19 +130,19 @@ pipeline {
                     npm run build
                     cd ../..
 
-                    echo "📦 앱 의존성 설치..."
+                    echo "📦 앱 의존성 정리..."
                     if [ -d "${APP_DIR}" ] && [ -f "${APP_DIR}/package.json" ]; then
                         cd ${APP_DIR}
                         npm install --no-optional --force
                         cd ../..
                     else
                         echo "⚠️  ${APP_DIR}에 package.json이 없습니다."
-                        echo "루트 node_modules를 사용하도록 심볼릭 링크 생성..."
+                        echo "중복된 node_modules 제거 중..."
 
-                        # apps/appdata에 node_modules 심볼릭 링크 생성
-                        if [ ! -L "${APP_DIR}/node_modules" ] && [ ! -d "${APP_DIR}/node_modules" ]; then
-                            ln -s ../../node_modules ${APP_DIR}/node_modules
-                            echo "✅ node_modules 링크 생성 완료"
+                        # apps/appdata/node_modules가 있으면 제거 (Gradle 충돌 방지)
+                        if [ -d "${APP_DIR}/node_modules" ] || [ -L "${APP_DIR}/node_modules" ]; then
+                            rm -rf ${APP_DIR}/node_modules
+                            echo "✅ ${APP_DIR}/node_modules 제거 완료"
                         fi
                     fi
 
