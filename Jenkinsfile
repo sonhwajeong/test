@@ -104,27 +104,30 @@ pipeline {
         // 🔧 Stage 3: 의존성 설치
         stage('Install Dependencies') {
             steps {
-                script {
-                    echo "========================================="
-                    echo "의존성 설치"
-                    echo "========================================="
-                    
-                    // 루트 의존성 설치
-                    sh '''
-                        echo "📦 루트 의존성 설치..."
+                sh '''
+                    echo "📦 루트 의존성 설치..."
+                    # 옵션(deps.optional) 설치 끔
+                    export NPM_CONFIG_OPTIONAL=false
+                    node -v
+                    npm -v
+
+                    # 1안: lock이 있으면 ci 시도(옵션 off). 실패하면 install로 폴백
+                    if [ -f package-lock.json ]; then
                         npm ci || npm install
-                        
-                        echo "📦 Shared 패키지 빌드..."
-                        cd packages/shared && npm ci && npm run build
-                        cd ../..
-                        
-                        echo "📦 앱 의존성 설치..."
-                        cd ${APP_DIR}
-                        npm ci || npm install
-                        
-                        echo "✅ 의존성 설치 완료"
-                    '''
-                }
+                    else
+                        npm install
+                    fi
+
+                    echo "📦 Shared 패키지 빌드..."
+                    cd packages/shared && npm ci && npm run build
+                    cd ../..
+
+                    echo "📦 앱 의존성 설치..."
+                    cd ${APP_DIR}
+                    npm ci || npm install
+
+                    echo "✅ 의존성 설치 완료"
+                '''
             }
         }
         
