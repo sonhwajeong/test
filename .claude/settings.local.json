@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(./gradlew.bat clean:*)",
+      "Bash(./gradlew.bat:*)",
+      "Bash(.gradlew.bat clean assembleDebug)",
+      "Bash(.gradlew.bat assembleDebug)",
+      "Bash(npx expo install expo-firebase-core expo-firebase-analytics)",
+      "Bash(npx expo run:android:*)",
+      "Bash(cat:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(sed:*)",
+      "Bash(npm run start:*)",
+      "Bash(gradlew:*)",
+      "Bash(./gradlew:*)",
+      "Bash(powershell:*)",
+      "Bash(npx:*)",
+      "Bash(npm update:*)",
+      "Bash(npm ls:*)",
+      "Bash(NODE_ENV=production ./gradlew assembleRelease)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
