@@ -209,6 +209,13 @@ pipeline {
                     echo "========================================="
 
                     sh '''
+                        # Gradle 플러그인 충돌 방지: appdata/node_modules 제거
+                        if [ -d "${APP_DIR}/node_modules" ] || [ -L "${APP_DIR}/node_modules" ]; then
+                            echo "⚠️  ${APP_DIR}/node_modules 제거 중..."
+                            rm -rf ${APP_DIR}/node_modules
+                            echo "✅ ${APP_DIR}/node_modules 제거 완료"
+                        fi
+
                         cd ${APP_DIR}/android
                         chmod +x gradlew
                         ./gradlew clean
