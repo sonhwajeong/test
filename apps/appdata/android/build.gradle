@@ -8,7 +8,7 @@ buildscript {
   dependencies {
     // 🔧 AGP 버전 명시 (Gradle 8.13과 호환)
     classpath('com.android.tools.build:gradle:8.7.3')
-    classpath('com.facebook.react:react-native-gradle-plugin')
+    // react-native-gradle-plugin은 settings.gradle의 includeBuild를 통해 로드됨
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20')
   }
 }
