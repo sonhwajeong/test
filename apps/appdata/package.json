@@ -1,0 +1,49 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-native/assets-registry": "^0.79.5",
+    "@react-native/codegen": "^0.79.5",
+    "@react-native/community-cli-plugin": "^0.79.5",
+    "@react-native/gradle-plugin": "^0.79.5",
+    "@react-native/js-polyfills": "^0.79.5",
+    "@react-native/normalize-colors": "^0.81.1",
+    "@react-native/virtualized-lists": "^0.81.1",
+    "@react-navigation/bottom-tabs": "^7.4.7",
+    "@react-navigation/core": "^7.12.4",
+    "@react-navigation/native": "^7.1.17",
+    "@react-navigation/native-stack": "^7.3.26",
+    "@react-navigation/stack": "^7.4.8",
+    "@types/react": "~19.0.10",
+    "expo": "~53.0.23",
+    "expo-application": "~6.1.5",
+    "expo-build-properties": "^0.14.8",
+    "expo-constants": "~17.1.7",
+    "expo-device": "~7.1.4",
+    "expo-location": "~18.1.6",
+    "expo-secure-store": "~14.2.4",
+    "expo-status-bar": "~2.2.3",
+    "firebase": "^12.2.1",
+    "metro-source-map": "^0.82.5",
+    "react": "19.0.0",
+    "react-native": "0.79.5",
+    "react-native-gesture-handler": "~2.24.0",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "~4.11.1",
+    "react-native-signature-canvas": "^5.0.1",
+    "react-native-webview": "13.13.5",
+    "typescript": "~5.8.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true
+}

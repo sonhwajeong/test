@@ -1,0 +1,31 @@
+# OSX
+#
+.DS_Store
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+
+# 🔧 Keystore files (보안 중요!)
+*.keystore
+*.jks
+!debug.keystore
+keystore.properties
+release-key.properties
+
+# Bundle artifacts
+*.jsbundle
+
+# APK/AAB 파일 (선택사항 - 버전관리에 포함하지 않음)
+*.apk
+*.aab
+
+# Generated files
+.externalNativeBuild/
+.cxx/

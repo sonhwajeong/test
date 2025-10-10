@@ -1,0 +1,109 @@
+pipeline {
+  agent { label 'windows' } // 윈도우 노드에서 실행
+
+  options {
+    // 빌드 로그 깔끔하게
+    timestamps()
+  }
+
+  environment {
+    NODE_ENV = 'production'  // expo-constants 경고 해결
+    // 필요 시 SDK 경로 지정
+    // ANDROID_HOME = 'C:\\Android\\sdk'
+    // ANDROID_SDK_ROOT = 'C:\\Android\\sdk'
+    // PATH = "${PATH};C:\\Android\\sdk\\platform-tools;C:\\Android\\sdk\\tools;C:\\Android\\sdk\\build-tools\\35.0.0"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Prepare keystore & properties') {
+      steps {
+        dir('apps/app/android') {
+          // 1) Secret file로 keystore 제공
+          withCredentials([file(credentialsId: 'MYAPP_KEYSTORE', variable: 'KEYSTORE_FILE')]) {
+            // android/app/ 아래로 복사
+            powershell """
+              Copy-Item "$env:KEYSTORE_FILE" "app\\myapp-upload-key.keystore" -Force
+            """
+          }
+
+          // 2) 비밀번호/앨리어스는 Secret text로 주입하여 keystore.properties 생성
+          withCredentials([
+            string(credentialsId: 'MYAPP_STORE_PW', variable: 'STORE_PW'),
+            string(credentialsId: 'MYAPP_KEY_PW',   variable: 'KEY_PW'),
+            string(credentialsId: 'MYAPP_KEY_ALIAS',variable: 'KEY_ALIAS')
+          ]) {
+            writeFile file: 'keystore.properties', text: """
+storeFile=app/myapp-upload-key.keystore
+storePassword=${STORE_PW}
+keyAlias=${KEY_ALIAS}
+keyPassword=${KEY_PW}
+""".trim()
+          }
+
+          // (선택) keystore.properties가 .gitignore에 있는지 확인용 출력
+          powershell 'Get-Content keystore.properties | Write-Host'
+        }
+      }
+    }
+
+    stage('Build AAB (bundleRelease) + APK (assembleRelease)') {
+      steps {
+        dir('apps/app/android') {
+          // Gradle Wrapper 실행 (Windows)
+          bat 'gradlew.bat --no-daemon clean :app:signingReport'
+          bat 'gradlew.bat --no-daemon :app:bundleRelease :app:assembleRelease'
+        }
+      }
+    }
+
+    stage('Verify artifacts') {
+      steps {
+        dir('apps/app/android/app/build/outputs') {
+          // 산출물 존재 확인
+          powershell """
+            Write-Host '--- BUNDLE ---'
+            Get-ChildItem bundle\\release\\app-release.aab -ErrorAction Stop | Format-List
+            Write-Host '--- APK ---'
+            Get-ChildItem apk\\release\\app-release.apk -ErrorAction Stop | Format-List
+          """
+        }
+      }
+    }
+
+    stage('(Optional) Install to device via ADB') {
+      when {
+        expression { return false } // 실제 기기 자동 설치가 필요하면 true로 바꿔요
+      }
+      steps {
+        dir('apps/app/android') {
+          // 기존 서명 충돌 피하려면: adb uninstall com.anonymous.app
+          bat 'adb devices'
+          bat 'adb uninstall com.anonymous.app || exit /b 0'
+          bat 'adb install -r app\\build\\outputs\\apk\\release\\app-release.apk'
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      // 빌드 문제 리포트 아카이브 (Gradle가 알려준 경로)
+      archiveArtifacts artifacts: 'apps/app/android/build/reports/problems/**/*.html', onlyIfSuccessful: false
+    }
+    success {
+      // 최종 산출물 보관(AAB, APK, mapping.txt)
+      archiveArtifacts artifacts: '''
+        apps/app/android/app/build/outputs/bundle/release/app-release.aab,
+        apps/app/android/app/build/outputs/apk/release/app-release.apk,
+        apps/app/android/app/build/outputs/mapping/release/mapping.txt
+      '''.trim(), fingerprint: true
+      echo '✅ Build artifacts archived.'
+    }
+  }
+}
