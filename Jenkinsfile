@@ -1,6 +1,12 @@
 pipeline {
     agent any
-    
+
+    tools {
+        // Jenkins 관리 > Global Tool Configuration에서 설정한 Node.js 사용
+        // 없으면 이 줄을 주석처리하고 Stage에서 직접 설치
+        nodejs 'NodeJS18'  // Jenkins에 'NodeJS18' 이름으로 등록된 Node.js 사용
+    }
+
     // 🔧 환경 변수 설정
     environment {
         // Node.js 버전
@@ -45,33 +51,53 @@ pipeline {
     }
     
     stages {
-        // 🔧 Stage 1: 환경 점검
+        // 🔧 Stage 1: 환경 점검 및 설정
         stage('Environment Check') {
             steps {
                 script {
                     echo "========================================="
                     echo "환경 점검 시작"
                     echo "========================================="
-                    
+
+                    // Node.js 확인 및 설치
+                    def nodeInstalled = sh(
+                        script: 'command -v node',
+                        returnStatus: true
+                    )
+
+                    if (nodeInstalled != 0) {
+                        echo "⚠️  Node.js가 설치되어 있지 않습니다. NVM을 사용하여 설치합니다..."
+                        sh '''
+                            # NVM 설치 (이미 설치되어 있으면 스킵)
+                            if [ ! -d "$HOME/.nvm" ]; then
+                                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+                            fi
+
+                            # NVM 로드
+                            export NVM_DIR="$HOME/.nvm"
+                            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+                            # Node.js 18 설치
+                            nvm install 18
+                            nvm use 18
+                        '''
+                    }
+
                     sh '''
+                        # NVM 환경 로드 (설치된 경우)
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+                        [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
                         echo "Node.js 버전:"
-                        node --version
-                        
+                        node --version || echo "Node.js not found"
+
                         echo "\nNPM 버전:"
-                        npm --version
-                        
-                        echo "\nYarn 버전:"
-                        yarn --version || echo "Yarn not installed"
-                        
+                        npm --version || echo "NPM not found"
+
                         echo "\nJava 버전:"
-                        java -version
-                        
-                        echo "\nGradle 버전:"
-                        cd ${APP_DIR}/android && ./gradlew --version
-                        
-                        echo "\nAndroid SDK 경로:"
-                        echo $ANDROID_HOME
-                        
+                        java -version || echo "Java not found"
+
                         echo "\n현재 디렉토리:"
                         pwd
                         ls -la
@@ -108,20 +134,24 @@ pipeline {
                     echo "========================================="
                     echo "의존성 설치"
                     echo "========================================="
-                    
+
                     // 루트 의존성 설치
                     sh '''
+                        # NVM 환경 로드
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
                         echo "📦 루트 의존성 설치..."
                         npm ci || npm install
-                        
+
                         echo "📦 Shared 패키지 빌드..."
                         cd packages/shared && npm ci && npm run build
                         cd ../..
-                        
+
                         echo "📦 앱 의존성 설치..."
                         cd ${APP_DIR}
                         npm ci || npm install
-                        
+
                         echo "✅ 의존성 설치 완료"
                     '''
                 }
@@ -138,9 +168,13 @@ pipeline {
                     echo "========================================="
                     echo "린트 검사"
                     echo "========================================="
-                    
+
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         sh '''
+                            # NVM 환경 로드
+                            export NVM_DIR="$HOME/.nvm"
+                            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
                             cd ${APP_DIR}
                             npm run lint || echo "⚠️  Lint 경고 있음"
                         '''
