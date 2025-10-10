@@ -7,34 +7,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a TypeScript monorepo using npm workspaces and Turbo for build orchestration. The architecture consists of:
 
 - **apps/web**: Next.js web application (`@myapp/web`)
-- **apps/app**: Expo/React Native mobile application
 - **packages/shared**: Shared TypeScript library (`@myapp/shared`)
 
 The shared package is consumed by the web application and provides common utilities and types across the platform.
 
+**Note**: There is an `apps/appdata` directory containing Android build artifacts, but no mobile application source code currently exists in the repository.
+
 ## Development Commands
 
 ### Root Level Commands (npm workspaces)
-- `npm run dev:app`: Start the Expo mobile app
 - `npm run dev:web`: Start the Next.js web app in development mode
-- `npm run build`: Build all apps and packages (shared → web → app)
+- `npm run build`: Build all packages and apps (shared → web)
 - `npm run build:shared`: Build only the shared package
 - `npm run build:web`: Build only the web application
-- `npm run build:app`: Build only the mobile application
 - `npm run lint`: Run linting across all packages and apps
+- `npm run lint:shared`: Lint only the shared package
+- `npm run lint:web`: Lint only the web application
 
 ### Web App (apps/web)
 - `cd apps/web && npm run dev`: Start Next.js dev server on all interfaces (0.0.0.0)
+- `cd apps/web && npm run dev:https`: Start Next.js dev server with HTTPS (experimental)
 - `cd apps/web && npm run build`: Production build
 - `cd apps/web && npm run start`: Start production server on all interfaces
 - `cd apps/web && npm run lint`: ESLint with Next.js config
 - `cd apps/web && npm run clean`: Remove .next build artifacts
-
-### Mobile App (apps/app)
-- `cd apps/app && npm run start`: Start Expo development server
-- `cd apps/app && npm run android`: Run on Android
-- `cd apps/app && npm run ios`: Run on iOS
-- `cd apps/app && npm run web`: Run Expo web version
 
 ### Shared Package (packages/shared)
 - `cd packages/shared && npm run build`: Compile TypeScript to dist/
@@ -45,9 +41,9 @@ The shared package is consumed by the web application and provides common utilit
 ## Build Dependencies
 
 The build system has dependencies managed by Turbo:
-- Shared package must build before web and app
-- Apps depend on shared package being built first
-- Run `npm run build:shared` before building individual apps if working on shared code
+- Shared package must build before web app
+- Web app depends on shared package being built first
+- Run `npm run build:shared` before building the web app if working on shared code
 
 ## TypeScript Project References
 
@@ -60,10 +56,10 @@ The project uses TypeScript project references for efficient builds:
 ## Key Technologies
 
 - **Web**: Next.js 14.0.4, React 18, TypeScript
-- **Mobile**: Expo ~53.0.22, React Native 0.79.5, React 19.0.0, React Navigation 7.x, Firebase 12.2.1
 - **Shared**: Pure TypeScript library
 - **Build System**: Turbo, npm workspaces
 - **Development**: TypeScript 5.x, ESLint
+- **Other**: Mermaid CLI for diagram generation
 
 ## Project Structure Details
 

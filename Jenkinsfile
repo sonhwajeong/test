@@ -5,25 +5,19 @@ pipeline {
     environment {
         // Node.js 버전
         NODE_VERSION = '18'
-        
+
         // Java/JDK 버전 (AGP 8.7 요구사항)
-        JAVA_HOME = tool name: 'JDK17', type: 'jdk'
-        
+        // JAVA_HOME = tool name: 'JDK17', type: 'jdk'
+
         // Android SDK 경로 (Jenkins 설정에 따라 조정)
         ANDROID_HOME = "${env.ANDROID_SDK_ROOT ?: '/opt/android-sdk'}"
-        
+
         // 앱 경로
         APP_DIR = 'apps/app'
-        
+
         // 빌드 출력 경로
         APK_OUTPUT_DIR = "${APP_DIR}/android/app/build/outputs/apk/release"
         AAB_OUTPUT_DIR = "${APP_DIR}/android/app/build/outputs/bundle/release"
-        
-        // Keystore 환경변수 (Jenkins Credentials에서 주입)
-        KEYSTORE_PATH = credentials('android-keystore-path')
-        KEYSTORE_PASSWORD = credentials('android-keystore-password')
-        KEY_ALIAS = credentials('android-key-alias')
-        KEY_PASSWORD = credentials('android-key-password')
     }
     
     // 🔧 빌드 파라미터
@@ -362,13 +356,25 @@ pipeline {
         }
         
         always {
-            // 임시 파일 정리
-            cleanWs(
-                cleanWhenNotBuilt: false,
-                deleteDirs: true,
-                disableDeferredWipeout: true,
-                notFailBuild: true
-            )
+            script {
+                echo "========================================="
+                echo "워크스페이스 정리"
+                echo "========================================="
+
+                // 임시 파일 정리
+                try {
+                    cleanWs(
+                        cleanWhenNotBuilt: false,
+                        deleteDirs: true,
+                        disableDeferredWipeout: true,
+                        notFailBuild: true
+                    )
+                    echo "✅ 워크스페이스 정리 완료"
+                } catch (Exception e) {
+                    echo "⚠️  워크스페이스 정리 실패: ${e.message}"
+                    // 실패해도 빌드는 계속 진행
+                }
+            }
         }
     }
 }
