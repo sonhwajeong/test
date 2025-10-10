@@ -136,7 +136,14 @@ pipeline {
                         npm install --no-optional --force
                         cd ../..
                     else
-                        echo "⚠️  ${APP_DIR} 디렉토리 또는 package.json이 없습니다. 건너뜁니다."
+                        echo "⚠️  ${APP_DIR}에 package.json이 없습니다."
+                        echo "루트 node_modules를 사용하도록 심볼릭 링크 생성..."
+
+                        # apps/appdata에 node_modules 심볼릭 링크 생성
+                        if [ ! -L "${APP_DIR}/node_modules" ] && [ ! -d "${APP_DIR}/node_modules" ]; then
+                            ln -s ../../node_modules ${APP_DIR}/node_modules
+                            echo "✅ node_modules 링크 생성 완료"
+                        fi
                     fi
 
                     echo "✅ 의존성 설치 완료"
