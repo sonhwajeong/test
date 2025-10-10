@@ -9,13 +9,16 @@ buildscript {
     // 🔧 AGP 버전 명시 (Gradle 8.13과 호환)
     classpath('com.android.tools.build:gradle:8.7.3')
     classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25')
+    // Kotlin 2.1.0 이상으로 업그레이드 (React Native/Expo 플러그인 호환성)
+    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20')
   }
 }
 
+def monorepoRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().getParentFile()
+
 def reactNativeAndroidDir = new File(
   providers.exec {
-    workingDir(rootDir)
+    workingDir(monorepoRoot)
     commandLine("node", "--print", "require.resolve('react-native/package.json')")
   }.standardOutput.asText.get().trim(),
   "../android"
