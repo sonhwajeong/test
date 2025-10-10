@@ -39,4 +39,4 @@ rootProject.name = 'app'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
-includeBuild(expoAutolinking.reactNativeGradlePlugin)
+// includeBuild(expoAutolinking.reactNativeGradlePlugin) // 중복 제거: 위에서 이미 includeBuild 됨 (line 11)

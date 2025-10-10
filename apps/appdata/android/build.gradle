@@ -9,7 +9,7 @@ buildscript {
     // 🔧 AGP 버전 명시 (Gradle 8.13과 호환)
     classpath('com.android.tools.build:gradle:8.7.3')
     classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25')
+    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20')
   }
 }
 
@@ -35,13 +35,13 @@ allprojects {
     maven { url 'https://www.jitpack.io' }
   }
 
-  // Kotlin 버전을 1.9.25로 강제 (2.1.20 방지)
+  // Kotlin 버전을 2.1.20으로 통일
   configurations.all {
     resolutionStrategy {
-      force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.25'
-      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.25'
-      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.25'
-      force 'org.jetbrains.kotlin:kotlin-stdlib-common:1.9.25'
+      force 'org.jetbrains.kotlin:kotlin-stdlib:2.1.20'
+      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.20'
+      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.20'
+      force 'org.jetbrains.kotlin:kotlin-stdlib-common:2.1.20'
     }
   }
 }
