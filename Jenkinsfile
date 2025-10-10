@@ -216,6 +216,13 @@ pipeline {
                             echo "✅ ${APP_DIR}/node_modules 제거 완료"
                         fi
 
+                        # node_modules 내의 Gradle 플러그인 빌드 결과물 삭제
+                        echo "🗑️  node_modules Gradle 플러그인 빌드 결과물 삭제 중..."
+                        rm -rf node_modules/@react-native/gradle-plugin/*/build
+                        rm -rf node_modules/expo-modules-autolinking/android/expo-gradle-plugin/*/build
+                        rm -rf node_modules/expo-modules-core/android/build
+                        echo "✅ 플러그인 빌드 결과물 삭제 완료"
+
                         # Kotlin 2.1.20 캐시 완전 삭제
                         echo "🗑️  Kotlin 2.1.20 캐시 삭제 중..."
                         rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.1.20
