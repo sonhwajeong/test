@@ -52,26 +52,38 @@ pipeline {
                     echo "========================================="
                     echo "환경 점검 시작"
                     echo "========================================="
-                    
+
                     sh '''
                         echo "Node.js 버전:"
                         node --version
-                        
+
                         echo "\nNPM 버전:"
                         npm --version
-                        
+
                         echo "\nYarn 버전:"
                         yarn --version || echo "Yarn not installed"
-                        
+
                         echo "\nJava 버전:"
                         java -version
-                        
+
+                        echo "\nGradle 권한 설정..."
+                        if [ -f ${APP_DIR}/android/gradlew ]; then
+                            chmod +x ${APP_DIR}/android/gradlew
+                            echo "✅ gradlew 실행 권한 부여 완료"
+                        else
+                            echo "⚠️  gradlew 파일이 없습니다."
+                        fi
+
                         echo "\nGradle 버전:"
-                        cd ${APP_DIR}/android && ./gradlew --version
-                        
+                        if [ -f ${APP_DIR}/android/gradlew ]; then
+                            cd ${APP_DIR}/android && ./gradlew --version
+                        else
+                            echo "⚠️  gradlew를 찾을 수 없어 Gradle 버전 확인을 건너뜁니다."
+                        fi
+
                         echo "\nAndroid SDK 경로:"
                         echo $ANDROID_HOME
-                        
+
                         echo "\n현재 디렉토리:"
                         pwd
                         ls -la
@@ -188,9 +200,10 @@ pipeline {
                     echo "========================================="
                     echo "Gradle 정리"
                     echo "========================================="
-                    
+
                     sh '''
                         cd ${APP_DIR}/android
+                        chmod +x gradlew
                         ./gradlew clean
                         echo "✅ Gradle 정리 완료"
                     '''
@@ -213,11 +226,12 @@ pipeline {
                     
                     sh """
                         cd ${APP_DIR}/android
-                        
+                        chmod +x gradlew
+
                         # 환경변수 확인
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
-                        
+
                         # APK 빌드
                         ./gradlew assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
@@ -226,9 +240,9 @@ pipeline {
                             -PKEY_PASSWORD=\${KEY_PASSWORD} \
                             --stacktrace \
                             --info
-                        
+
                         echo "✅ APK 빌드 완료"
-                        
+
                         # 빌드된 APK 확인
                         ls -lh app/build/outputs/apk/${params.BUILD_VARIANT}/
                     """
@@ -251,7 +265,8 @@ pipeline {
                     
                     sh """
                         cd ${APP_DIR}/android
-                        
+                        chmod +x gradlew
+
                         # AAB 빌드
                         ./gradlew bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
@@ -260,9 +275,9 @@ pipeline {
                             -PKEY_PASSWORD=\${KEY_PASSWORD} \
                             --stacktrace \
                             --info
-                        
+
                         echo "✅ AAB 빌드 완료"
-                        
+
                         # 빌드된 AAB 확인
                         ls -lh app/build/outputs/bundle/${params.BUILD_VARIANT}/
                     """
@@ -316,6 +331,7 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                         sh '''
                             cd ${APP_DIR}/android
+                            chmod +x gradlew
                             ./gradlew test || echo "⚠️  테스트 실패"
                         '''
                     }

@@ -6,23 +6,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a TypeScript monorepo using npm workspaces and Turbo for build orchestration. The architecture consists of:
 
-- **apps/web**: Next.js web application (`@myapp/web`)
+- **apps/web**: Next.js 14 web application (`@myapp/web`)
 - **packages/shared**: Shared TypeScript library (`@myapp/shared`)
+- **apps/appdata**: Android build artifacts and configuration (React Native/Expo-based)
 
 The shared package is consumed by the web application and provides common utilities and types across the platform.
 
-**Note**: There is an `apps/appdata` directory containing Android build artifacts, but no mobile application source code currently exists in the repository.
+**Important**: `apps/appdata` contains Android build artifacts, Gradle configuration, and compiled outputs but lacks a complete React Native/Expo source structure (no `package.json`, `app.json`, or source files like `App.tsx`). It appears to be a build output directory rather than a source directory.
 
 ## Development Commands
 
 ### Root Level Commands (npm workspaces)
-- `npm run dev:web`: Start the Next.js web app in development mode
-- `npm run build`: Build all packages and apps (shared → web)
+- `npm run dev:web`: Start Next.js web app in development mode
+- `npm run build`: Build all packages and apps (shared → web → app)
 - `npm run build:shared`: Build only the shared package
 - `npm run build:web`: Build only the web application
+- `npm run build:app`: Build the mobile app (requires `apps/app` with `package.json`)
 - `npm run lint`: Run linting across all packages and apps
 - `npm run lint:shared`: Lint only the shared package
 - `npm run lint:web`: Lint only the web application
+- `npm run lint:app`: Lint the mobile app
+
+**Note**: Mobile app commands reference `apps/app`, which does not currently exist. Only `apps/appdata` (Android build artifacts) is present.
 
 ### Web App (apps/web)
 - `cd apps/web && npm run dev`: Start Next.js dev server on all interfaces (0.0.0.0)
@@ -69,76 +74,64 @@ The project uses TypeScript project references for efficient builds:
 - **Navigation Components**: Located in `apps/app/src/navigation/` (RootTabs)
 - **Firebase Integration**: Firebase 12.2.1 for backend services
 
-### Shared Package Structure
+### Shared Package (`packages/shared`)
 - **Source**: `packages/shared/src/` with `api.ts`, `types.ts`, `utils.ts`, `index.ts`
-- **Build Output**: `packages/shared/dist/` with declaration files
-- **Usage**: Imported as `@myapp/shared` in web app (see example in `apps/web/src/app/page.tsx`)
+- **Build Output**: `packages/shared/dist/` with compiled JavaScript and TypeScript declaration files
+- **Build Command**: `npm run build` (runs `tsc`)
+- **Dev Command**: `npm run dev` (runs `tsc --watch`)
+- **Usage**: Imported as `@myapp/shared` in web app
 
 ### Web App Structure
 - **Framework**: Next.js 14.0.4 with App Router
 - **Path Mapping**: `@/*` maps to `./src/*`
 - **Shared Integration**: Imports utilities like `formatDate`, `isValidEmail` from `@myapp/shared`
 
+## Jenkins CI/CD
+
+A `Jenkinsfile` is provided for Android builds with the following configuration:
+
+- **APP_DIR**: Set to `apps/appdata` (Android build artifacts directory)
+- **Node.js**: Uses Node 20.x
+- **Java/JDK**: Requires Java 17 (OpenJDK 17.0.16)
+- **Android SDK**: Configurable via `ANDROID_HOME` environment variable
+- **Build Types**: Supports APK and AAB builds for release/debug variants
+- **Signing**: Requires keystore configuration via Jenkins credentials
+
+### Jenkins Build Stages:
+1. **Environment Check**: Verifies Node.js, npm, Java, Gradle versions
+2. **Checkout**: Clones repository and shows git info
+3. **Install Dependencies**: Installs npm dependencies with `--no-optional --force` to skip platform-specific optional packages (e.g., `lightningcss-win32-x64-msvc` on Linux)
+4. **Lint**: Runs linting (conditional, only for release builds)
+5. **Set Version**: Updates versionCode/versionName in build.gradle (optional)
+6. **Clean**: Runs Gradle clean
+7. **Build APK/AAB**: Builds Android artifacts using Gradle
+8. **Archive Artifacts**: Archives APKs, AABs, and ProGuard mapping files
+9. **Test**: Runs Gradle tests (conditional)
+
+### Jenkins Issues:
+- **Missing gradlew**: `apps/appdata/android` lacks a `gradlew` wrapper script. Builds will fail at the "Environment Check" stage.
+- **Platform-specific dependencies**: Use `npm install --no-optional --force` to avoid errors installing Windows-specific packages like `lightningcss-win32-x64-msvc` on Linux Jenkins agents.
+- **Missing app source**: `apps/appdata` contains only build artifacts, not a complete React Native/Expo app source.
+
 ## Common Issues
 
-### Mobile App Build Problems
-- **Module Resolution**: Ensure `apps/app/App.js` properly exports from `./src/App`
-- **Navigation Setup**: Check `RootTabs` component exists in `apps/app/src/navigation/`
-- **Firebase Config**: Verify Firebase configuration for mobile platform
-- **Entry Point**: Ensure `app.json` specifies `"main": "index.js"`
-- **Metro Cache**: Clear cache with `cd apps/app && npx expo start --clear`
-- **NODE_ENV**: Set environment variable for builds: `NODE_ENV=production`
-- **BuildConfig Import**: If Android build fails with "Unresolved reference 'BuildConfig'", add import:
-  - In `MainActivity.kt` and `MainApplication.kt`: `import com.anonymous.app.BuildConfig`
-- **C++ Standard Issues**: If build fails with C++ errors like "no member named 'bit_width'" or "unknown type name 'concept'":
-  - React Native 0.79.5+ requires C++20 support
-  - Add C++20 support in `apps/app/app.json`:
-  ```json
-  ["expo-build-properties", {
-    "android": {
-      "cppFlags": ["-std=c++20"],
-      "abiFilters": ["arm64-v8a", "armeabi-v7a"]
-    }
-  }]
-  ```
-  - Run `npx expo prebuild --clean` after changes
-  - Re-add BuildConfig imports after prebuild
-- **react-native-maps Compatibility**: If C++ errors persist, temporarily remove react-native-maps:
-  - `npm uninstall react-native-maps`
-  - Rebuild project
-  - Reinstall when React Native updates fix compatibility
-- **Android Gradle Paths**: In `apps/app/android/app/build.gradle`, ensure:
-  - `entryFile = file("../index.js")` (not `../../index.js`)
-  - `root = file("../")` (not `../../`)
+### Android Build Issues in Jenkins
+- **Missing gradlew wrapper**: The `apps/appdata/android` directory lacks `gradlew` and `gradlew.bat` scripts
+  - Solution: Copy Gradle wrapper from a React Native/Expo project or run `gradle wrapper` in the android directory
+  - Ensure gradlew has execute permissions: `chmod +x apps/appdata/android/gradlew`
+- **Platform-specific optional dependencies**: Installing `lightningcss-win32-x64-msvc` on Linux causes `EBADPLATFORM` errors
+  - Solution: Use `npm install --no-optional --force` in Jenkinsfile
+  - This skips platform-specific optional packages that aren't compatible with the Linux Jenkins agent
+- **Missing app source structure**: `apps/appdata` contains only Android build artifacts
+  - No `package.json`, `app.json`, or React Native source files
+  - Mobile app commands in root `package.json` reference non-existent `apps/app` directory
+  - This appears to be a build output directory, not a source directory
 
-### Troubleshooting Commands
-- Clear Metro cache: `cd apps/app && npx expo start --clear`
-- Reset React Native cache: `cd apps/app && npx react-native start --reset-cache`
-- Clean build: `cd apps/app && rm -rf node_modules && npm install`
-
-## ⚠️ Important: Working Directory
-
-**CRITICAL**: All mobile app commands must be run from `apps/app` directory, NOT from the monorepo root.
-
-### Correct Usage:
-```bash
-# ✅ CORRECT - Run from apps/app directory
-cd apps/app
-npm start                    # Start Expo dev server
-npm run android             # Build and run on Android
-npm run ios                 # Build and run on iOS
-npx expo start --clear      # Clear Metro cache
-
-# ❌ WRONG - Don't run from monorepo root
-# npm run dev:app            # This can cause module resolution issues
-```
-
-### Root-level Commands (from monorepo root):
-```bash
-# These are safe to run from root as they change directory internally
-npm run build:app           # Builds the app (cd apps/app && npm run build)
-npm run lint:app            # Lints the app (cd apps/app && npm run lint)
-```
+### Web App Build Issues
+- **Shared package dependency**: Web app requires the shared package to be built first
+  - Always run `npm run build:shared` before `npm run build:web`
+  - Or use `npm run build` to build in correct order (Turbo handles dependencies)
+- **Monorepo package resolution**: Next.js requires `transpilePackages: ["@myapp/shared"]` in `next.config.js`
 
 ## Configuration Details
 
