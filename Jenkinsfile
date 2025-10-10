@@ -216,9 +216,23 @@ pipeline {
                             echo "✅ ${APP_DIR}/node_modules 제거 완료"
                         fi
 
+                        # Kotlin 2.1.20 캐시 완전 삭제
+                        echo "🗑️  Kotlin 2.1.20 캐시 삭제 중..."
+                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.1.20
+                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/2.1.20
+                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/2.1.20
+                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/2.1.20
+                        rm -rf ~/.gradle/caches/*/kotlin-compiler-embeddable-2.1.20*
+                        echo "✅ Kotlin 2.1.20 캐시 삭제 완료"
+
+                        # 프로젝트 로컬 캐시도 삭제
                         cd ${APP_DIR}/android
+                        rm -rf .gradle
+                        rm -rf build
+                        rm -rf app/build
+
                         chmod +x gradlew
-                        ./gradlew clean
+                        ./gradlew clean --no-build-cache
                         echo "✅ Gradle 정리 완료"
                     '''
                 }
