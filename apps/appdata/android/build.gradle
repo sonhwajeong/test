@@ -1,16 +1,17 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-def monorepoRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().getParentFile()
-
-def reactNativeAndroidDir = new File(
-  providers.exec {
-    workingDir(monorepoRoot)
-    commandLine("node", "--print", "require.resolve('react-native/package.json')")
-  }.standardOutput.asText.get().trim(),
-  "../android"
-)
-
 buildscript {
+  // 모노레포 루트 디렉토리 (android 디렉토리의 3단계 위)
+  def monorepoRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().getParentFile()
+
+  def reactNativeAndroidDir = new File(
+    providers.exec {
+      workingDir(monorepoRoot)
+      commandLine("node", "--print", "require.resolve('react-native/package.json')")
+    }.standardOutput.asText.get().trim(),
+    "../android"
+  )
+
   repositories {
     maven {
       // React Native Maven repository (for react-native-gradle-plugin)
@@ -25,6 +26,16 @@ buildscript {
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20')
   }
 }
+
+def monorepoRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().getParentFile()
+
+def reactNativeAndroidDir = new File(
+  providers.exec {
+    workingDir(monorepoRoot)
+    commandLine("node", "--print", "require.resolve('react-native/package.json')")
+  }.standardOutput.asText.get().trim(),
+  "../android"
+)
 
 allprojects {
   repositories {
