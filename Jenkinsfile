@@ -106,34 +106,21 @@ pipeline {
             steps {
                 sh '''
                     echo "📦 루트 의존성 설치..."
-                    # 옵션(deps.optional) 설치 끔
                     node -v
                     npm -v
 
-                    # lock이 있으면 ci 시도(옵션 off). 실패하면 install로 폴백
-                    if [ -f package-lock.json ]; then
-                        npm ci --omit=optional || npm install --omit=optional
-                    else
-                        npm install --omit=optional
-                    fi
+                    # npm ci는 lock 파일을 엄격하게 따르므로 install 사용
+                    npm install --omit=optional
 
                     echo "📦 Shared 패키지 빌드..."
                     cd packages/shared
-                    if [ -f package-lock.json ]; then
-                        npm ci --omit=optional || npm install --omit=optional
-                    else
-                        npm install --omit=optional
-                    fi
+                    npm install --omit=optional
                     npm run build
                     cd ../..
 
                     echo "📦 앱 의존성 설치..."
                     cd ${APP_DIR}
-                    if [ -f package-lock.json ]; then
-                        npm ci --omit=optional || npm install --omit=optional
-                    else
-                        npm install --omit=optional
-                    fi
+                    npm install --omit=optional
 
                     echo "✅ 의존성 설치 완료"
                 '''
