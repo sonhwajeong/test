@@ -13,7 +13,7 @@ pipeline {
         ANDROID_HOME = "${env.ANDROID_SDK_ROOT ?: '/opt/android-sdk'}"
 
         // 앱 경로
-        APP_DIR = 'apps/app'
+        APP_DIR = 'apps/appdata'
 
         // 빌드 출력 경로
         APK_OUTPUT_DIR = "${APP_DIR}/android/app/build/outputs/apk/release"
@@ -119,8 +119,13 @@ pipeline {
                     cd ../..
 
                     echo "📦 앱 의존성 설치..."
-                    cd ${APP_DIR}
-                    npm install --no-optional --force
+                    if [ -d "${APP_DIR}" ] && [ -f "${APP_DIR}/package.json" ]; then
+                        cd ${APP_DIR}
+                        npm install --no-optional --force
+                        cd ../..
+                    else
+                        echo "⚠️  ${APP_DIR} 디렉토리 또는 package.json이 없습니다. 건너뜁니다."
+                    fi
 
                     echo "✅ 의존성 설치 완료"
                 '''
