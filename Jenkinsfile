@@ -109,18 +109,18 @@ pipeline {
                     node -v
                     npm -v
 
-                    # npm ci는 lock 파일을 엄격하게 따르므로 install 사용
-                    npm install --omit=optional
+                    # lock 파일에 있는 optional deps도 건너뛰기 위해 --no-optional --force 사용
+                    npm install --no-optional --force
 
                     echo "📦 Shared 패키지 빌드..."
                     cd packages/shared
-                    npm install --omit=optional
+                    npm install --no-optional --force
                     npm run build
                     cd ../..
 
                     echo "📦 앱 의존성 설치..."
                     cd ${APP_DIR}
-                    npm install --omit=optional
+                    npm install --no-optional --force
 
                     echo "✅ 의존성 설치 완료"
                 '''
