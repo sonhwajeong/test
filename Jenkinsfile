@@ -66,6 +66,12 @@ pipeline {
                         echo "\nJava 버전:"
                         java -version
 
+                        echo "\n🗑️  Gradle 캐시 정리 (Kotlin 버전 업그레이드 반영)..."
+                        # Jenkins 홈의 Gradle 캐시 삭제
+                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin
+                        rm -rf ~/.gradle/caches/*/kotlin-*
+                        echo "✅ Gradle 캐시 정리 완료"
+
                         echo "\nGradle 권한 설정..."
                         if [ -f ${APP_DIR}/android/gradlew ]; then
                             chmod +x ${APP_DIR}/android/gradlew
@@ -217,8 +223,16 @@ pipeline {
                         fi
 
                         cd ${APP_DIR}/android
+
+                        # Gradle 캐시 삭제 (Kotlin 버전 업그레이드 반영)
+                        echo "🗑️  Gradle 캐시 삭제 중..."
+                        rm -rf .gradle
+                        rm -rf build
+                        rm -rf app/build
+                        echo "✅ Gradle 캐시 삭제 완료"
+
                         chmod +x gradlew
-                        ./gradlew clean
+                        ./gradlew clean --no-daemon
                         echo "✅ Gradle 정리 완료"
                     '''
                 }
