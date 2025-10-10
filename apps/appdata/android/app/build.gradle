@@ -106,20 +106,20 @@ android {
         release {
             // Jenkins에서 환경변수로 주입
             def keystorePath = System.getenv("KEYSTORE_PATH")
-            def keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_STORE_PASSWORD")
-            def keyAlias = System.getenv("KEY_ALIAS") ?: project.findProperty("MYAPP_UPLOAD_KEY_ALIAS")
-            def keyPassword = System.getenv("KEY_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_KEY_PASSWORD")
-            
+            def keystorePass = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_STORE_PASSWORD")
+            def keyAliasName = System.getenv("KEY_ALIAS") ?: project.findProperty("MYAPP_UPLOAD_KEY_ALIAS")
+            def keyPass = System.getenv("KEY_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_KEY_PASSWORD")
+
             // 환경변수가 있으면 사용, 없으면 로컬 gradle.properties 사용
             if (keystorePath) {
                 storeFile file(keystorePath)
             } else if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
                 storeFile file(project.MYAPP_UPLOAD_STORE_FILE)
             }
-            
-            storePassword keystorePassword
-            keyAlias keyAlias
-            keyPassword keyPassword
+
+            storePassword keystorePass
+            keyAlias keyAliasName
+            keyPassword keyPass
             
             // APK 서명 버전 활성화
             v1SigningEnabled true
