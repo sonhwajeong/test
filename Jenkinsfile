@@ -149,8 +149,8 @@ pipeline {
                     echo "✅ 의존성 설치 완료"
 
                     echo "🔧 React Native 플러그인 패치 중..."
-                    # :app을 :appdata로 변경
-                    find node_modules/@react-native/gradle-plugin -name "ReactRootProjectPlugin.kt" -type f -exec sed -i 's/:app/:appdata/g' {} +
+                    # 루트와 앱 디렉토리 모두에서 플러그인 찾아서 패치
+                    find . -path "*/node_modules/@react-native/gradle-plugin/*/src/main/kotlin/com/facebook/react/ReactRootProjectPlugin.kt" -type f -exec sed -i 's/:app/:appdata/g' {} + 2>/dev/null || true
                     echo "✅ 플러그인 패치 완료"
                 '''
             }
