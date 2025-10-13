@@ -49,11 +49,14 @@ allprojects {
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
 
-// 🔧 Monorepo: React Native autolinking 태스크에 올바른 프로젝트 루트 전달
+// 🔧 Monorepo: React Native autolinking 태스크 작업 디렉토리 설정
 gradle.projectsEvaluated {
   subprojects { subproject ->
     subproject.tasks.withType(com.facebook.react.tasks.GeneratePackageListTask).configureEach { task ->
-      task.reactRoot.set(projectRoot)
+      task.doFirst {
+        // React Native CLI가 올바른 프로젝트 루트(apps/appdata)에서 실행되도록 설정
+        task.workingDir = projectRoot
+      }
     }
   }
 }
