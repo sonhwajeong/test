@@ -25,13 +25,8 @@ ext {
   reactNativeProjectRoot = projectRoot.absolutePath
 }
 
-def reactNativeAndroidDir = new File(
-  providers.exec {
-    workingDir(projectRoot)
-    commandLine("node", "--print", "require.resolve('react-native/package.json')")
-  }.standardOutput.asText.get().trim(),
-  "../android"
-)
+// 🔧 React Native Android 경로를 직접 지정 (monorepo 구조)
+def reactNativeAndroidDir = new File(projectRoot, "node_modules/react-native/android")
 
 allprojects {
   repositories {
