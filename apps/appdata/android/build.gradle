@@ -41,5 +41,5 @@ allprojects {
   }
 }
 
+// 🔧 Expo 플러그인만 적용 (React Native rootproject 플러그인은 제외)
 apply plugin: "expo-root-project"
-apply plugin: "com.facebook.react.rootproject"
