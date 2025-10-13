@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native/assets-registry": "^0.79.5",
     "@react-native/codegen": "^0.79.5",
     "@react-native/community-cli-plugin": "^0.79.5",
@@ -36,6 +36,7 @@
     "metro-source-map": "^0.82.5",
     "react": "19.0.0",
     "react-native": "0.79.5",
+    "react-native-edge-to-edge": "^1.7.0",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "~4.11.1",
@@ -44,7 +45,8 @@
     "typescript": "~5.8.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "latest"
   },
   "private": true
 }
