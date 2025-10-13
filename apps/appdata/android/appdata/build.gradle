@@ -2,25 +2,22 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
-// 모노레포 루트 디렉토리 (android 디렉토리의 3단계 위)
-def projectRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().getParentFile().getAbsolutePath()
+def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
-    def monorepoRoot = new File(projectRoot)
-
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, monorepoRoot).text.trim())
-    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, monorepoRoot).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, monorepoRoot).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
-    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, monorepoRoot).text.trim()).getParentFile().getAbsoluteFile()
+    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
+    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
 
     enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
     // Use Expo CLI to bundle the app, this ensures the Metro config
     // works correctly with Expo projects.
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, monorepoRoot).text.trim())
+    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
     bundleCommand = "export:embed"
 
     /* Folders */
@@ -109,9 +106,9 @@ android {
         release {
             // Jenkins에서 환경변수로 주입
             def keystorePath = System.getenv("KEYSTORE_PATH")
-            def keystorePass = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_STORE_PASSWORD")
-            def keyAliasName = System.getenv("KEY_ALIAS") ?: project.findProperty("MYAPP_UPLOAD_KEY_ALIAS")
-            def keyPass = System.getenv("KEY_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_KEY_PASSWORD")
+            def keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_STORE_PASSWORD")
+            def keyAliasValue = System.getenv("KEY_ALIAS") ?: project.findProperty("MYAPP_UPLOAD_KEY_ALIAS")
+            def keyPasswordValue = System.getenv("KEY_PASSWORD") ?: project.findProperty("MYAPP_UPLOAD_KEY_PASSWORD")
 
             // 환경변수가 있으면 사용, 없으면 로컬 gradle.properties 사용
             if (keystorePath) {
@@ -120,10 +117,16 @@ android {
                 storeFile file(project.MYAPP_UPLOAD_STORE_FILE)
             }
 
-            storePassword keystorePass
-            keyAlias keyAliasName
-            keyPassword keyPass
-            
+            if (keystorePassword) {
+                storePassword keystorePassword
+            }
+            if (keyAliasValue) {
+                keyAlias keyAliasValue
+            }
+            if (keyPasswordValue) {
+                keyPassword keyPasswordValue
+            }
+
             // APK 서명 버전 활성화
             v1SigningEnabled true
             v2SigningEnabled true

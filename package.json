@@ -494,6 +494,7 @@
     "react-devtools-core": "^4.28.5",
     "react-freeze": "^1.0.4",
     "react-is": "^16.13.1",
+    "react-native": "^0.76.6",
     "react-refresh": "^0.14.2",
     "react-shallow-renderer": "^16.15.0",
     "readable-stream": "^3.6.2",
