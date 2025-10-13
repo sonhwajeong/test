@@ -195,39 +195,16 @@ pipeline {
                         echo "🔧 React Native 0.79 호환성 패치 중..."
                         echo "현재 디렉토리: \$(pwd)"
 
-                        # 루트 node_modules 경로 (monorepo 루트)
+                        # 루트 node_modules/react-native 패치
                         ROOT_RN_DIR="node_modules/react-native"
-                        APP_RN_DIR="${APP_DIR}/node_modules/react-native"
 
-                        # 1. 루트 node_modules 패치
                         if [ -f "\$ROOT_RN_DIR/gradle.properties" ]; then
-                            echo "✅ [ROOT] gradle.properties 발견: \$ROOT_RN_DIR/gradle.properties"
+                            echo "✅ gradle.properties 발견: \$ROOT_RN_DIR/gradle.properties"
                             mkdir -p "\$ROOT_RN_DIR/ReactAndroid"
                             cp "\$ROOT_RN_DIR/gradle.properties" "\$ROOT_RN_DIR/ReactAndroid/gradle.properties"
-                            echo "✅ [ROOT] ReactAndroid/gradle.properties 생성 완료"
+                            echo "✅ ReactAndroid/gradle.properties 생성 완료"
                         else
-                            echo "⚠️  [ROOT] gradle.properties를 찾을 수 없습니다"
-                        fi
-
-                        # 2. apps/appdata/node_modules가 심볼릭 링크로 존재하지 않으면 생성
-                        if [ ! -e "${APP_DIR}/node_modules" ]; then
-                            echo "📁 ${APP_DIR}/node_modules 심볼릭 링크 생성 중..."
-                            ln -s "\$(pwd)/node_modules" "${APP_DIR}/node_modules"
-                            echo "✅ 심볼릭 링크 생성 완료"
-                        fi
-
-                        # 3. apps/appdata/node_modules/react-native 패치 확인
-                        if [ -f "\$APP_RN_DIR/gradle.properties" ]; then
-                            echo "✅ [APP] gradle.properties 발견: \$APP_RN_DIR/gradle.properties"
-                            mkdir -p "\$APP_RN_DIR/ReactAndroid"
-                            cp "\$APP_RN_DIR/gradle.properties" "\$APP_RN_DIR/ReactAndroid/gradle.properties"
-                            echo "✅ [APP] ReactAndroid/gradle.properties 생성 완료"
-                            ls -la "\$APP_RN_DIR/ReactAndroid/"
-                        else
-                            echo "❌ [APP] gradle.properties를 찾을 수 없습니다"
-                            echo "디렉토리 구조:"
-                            ls -la "${APP_DIR}/" || true
-                            ls -la "\$APP_RN_DIR/" 2>/dev/null || echo "React Native 디렉토리가 존재하지 않습니다"
+                            echo "❌ gradle.properties를 찾을 수 없습니다"
                             exit 1
                         fi
 
@@ -274,19 +251,13 @@ pipeline {
                         # 🔧 React Native 0.79+ 호환성 패치: ReactAndroid 디렉토리 생성
                         echo "🔧 React Native 0.79 호환성 패치 중..."
 
-                        # apps/appdata/node_modules가 심볼릭 링크로 존재하지 않으면 생성
-                        if [ ! -e "${APP_DIR}/node_modules" ]; then
-                            echo "📁 ${APP_DIR}/node_modules 심볼릭 링크 생성 중..."
-                            ln -s "\$(pwd)/node_modules" "${APP_DIR}/node_modules"
-                            echo "✅ 심볼릭 링크 생성 완료"
-                        fi
+                        # 루트 node_modules/react-native 패치
+                        ROOT_RN_DIR="node_modules/react-native"
 
-                        # apps/appdata/node_modules/react-native 패치
-                        APP_RN_DIR="${APP_DIR}/node_modules/react-native"
-                        if [ -f "\$APP_RN_DIR/gradle.properties" ]; then
+                        if [ -f "\$ROOT_RN_DIR/gradle.properties" ]; then
                             echo "✅ gradle.properties 발견"
-                            mkdir -p "\$APP_RN_DIR/ReactAndroid"
-                            cp "\$APP_RN_DIR/gradle.properties" "\$APP_RN_DIR/ReactAndroid/gradle.properties"
+                            mkdir -p "\$ROOT_RN_DIR/ReactAndroid"
+                            cp "\$ROOT_RN_DIR/gradle.properties" "\$ROOT_RN_DIR/ReactAndroid/gradle.properties"
                             echo "✅ ReactAndroid/gradle.properties 생성 완료"
                         else
                             echo "❌ gradle.properties를 찾을 수 없습니다"
