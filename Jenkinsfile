@@ -206,8 +206,8 @@ pipeline {
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
 
-                        # APK 빌드 (react.root=.. 로 프로젝트 루트 지정)
-                        ./android/gradlew -p android -Preact.root=.. assemble${variant} \
+                        # APK 빌드
+                        ./android/gradlew -p android assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -242,8 +242,8 @@ pipeline {
                         cd ${APP_DIR}
                         chmod +x android/gradlew
 
-                        # AAB 빌드 (react.root=.. 로 프로젝트 루트 지정)
-                        ./android/gradlew -p android -Preact.root=.. bundle${variant} \
+                        # AAB 빌드
+                        ./android/gradlew -p android bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \

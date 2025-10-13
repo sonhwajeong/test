@@ -13,15 +13,18 @@ react {
     // 🔧 Monorepo: React Native가 올바른 프로젝트 루트를 찾도록 명시
     root = file(projectRoot)
 
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
-    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
-    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+    // 🔧 Monorepo: 모든 경로를 projectRoot 기준으로 고정
+    reactNativeDir = file("$projectRoot/node_modules/react-native")
+    codegenDir = file("$projectRoot/node_modules/@react-native/codegen")
+    cliFile = file("$projectRoot/node_modules/@expo/cli/build/bin/cli")
 
-    // 🔧 enableBundleCompression은 React Native 0.79.x에서 제거됨
-    // Use Expo CLI to bundle the app, this ensures the Metro config
-    // works correctly with Expo projects.
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    // Node 실행 경로 (Jenkins에서도 작동하도록)
+    nodeExecutableAndArgs = ["node"]
+
+    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, file(projectRoot)).text.trim())
+    hermesCommand = "$projectRoot/node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
+
+    // Expo CLI 번들링 사용
     bundleCommand = "export:embed"
 
     /* Folders */
