@@ -17,9 +17,17 @@ buildscript {
   }
 }
 
+// 🔧 Monorepo: 프로젝트 루트 (apps/appdata) 설정
+def projectRoot = rootDir.getAbsoluteFile().getParentFile()
+
+// 🔧 React Native 플러그인에게 프로젝트 루트 경로 전달
+ext {
+  reactNativeProjectRoot = projectRoot.absolutePath
+}
+
 def reactNativeAndroidDir = new File(
   providers.exec {
-    workingDir(rootDir)
+    workingDir(projectRoot)
     commandLine("node", "--print", "require.resolve('react-native/package.json')")
   }.standardOutput.asText.get().trim(),
   "../android"
