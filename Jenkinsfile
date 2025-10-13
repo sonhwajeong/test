@@ -113,67 +113,26 @@ pipeline {
             }
         }
         
-        // 🔧 Stage 3: 의존성 설치
-        stage('Install Dependencies') {
+        // 🔧 Stage 3: 환경 준비
+        stage('Prepare Build') {
             steps {
                 sh '''
-                    echo "📦 루트 의존성 설치..."
-                    node -v
-                    npm -v
+                    echo "🔧 빌드 환경 준비 중..."
 
-                    # lock 파일에 있는 optional deps도 건너뛰기 위해 --no-optional --force 사용
-                    npm install --no-optional --force
-
-                    echo "📦 Shared 패키지 빌드..."
-                    cd packages/shared
-                    npm install --no-optional --force
-                    npm run build
-                    cd ../..
-
-                    echo "📦 앱 의존성 정리..."
-                    if [ -d "${APP_DIR}" ] && [ -f "${APP_DIR}/package.json" ]; then
-                        cd ${APP_DIR}
-                        npm install --no-optional --force
-                        cd ../..
-                    else
-                        echo "⚠️  ${APP_DIR}에 package.json이 없습니다."
-                        echo "중복된 node_modules 제거 중..."
-
-                        # apps/appdata/node_modules가 있으면 제거 (Gradle 충돌 방지)
-                        if [ -d "${APP_DIR}/node_modules" ] || [ -L "${APP_DIR}/node_modules" ]; then
-                            rm -rf ${APP_DIR}/node_modules
-                            echo "✅ ${APP_DIR}/node_modules 제거 완료"
-                        fi
-                    fi
-
-                    echo "✅ 의존성 설치 완료"
-
+                    # React Native 플러그인 패치 (node_modules가 커밋되어 있다고 가정)
                     echo "🔧 React Native 플러그인 패치 중..."
-                    # 루트와 앱 디렉토리 모두에서 플러그인 찾아서 패치
                     find . -path "*/node_modules/@react-native/gradle-plugin/*/src/main/kotlin/com/facebook/react/ReactRootProjectPlugin.kt" -type f -exec sed -i 's/:app/:appdata/g' {} + 2>/dev/null || true
                     echo "✅ 플러그인 패치 완료"
+
+                    # 중복 node_modules 정리 (Gradle 충돌 방지)
+                    echo "🧹 중복 node_modules 정리 중..."
+                    if [ -d "${APP_DIR}/node_modules" ] || [ -L "${APP_DIR}/node_modules" ]; then
+                        rm -rf ${APP_DIR}/node_modules
+                        echo "✅ ${APP_DIR}/node_modules 제거 완료"
+                    fi
+
+                    echo "✅ 빌드 환경 준비 완료"
                 '''
-            }
-        }
-        
-        // 🔧 Stage 4: 린트 검사 (선택사항)
-        stage('Lint') {
-            when {
-                expression { params.BUILD_VARIANT == 'release' }
-            }
-            steps {
-                script {
-                    echo "========================================="
-                    echo "린트 검사"
-                    echo "========================================="
-                    
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh '''
-                            cd ${APP_DIR}
-                            npm run lint || echo "⚠️  Lint 경고 있음"
-                        '''
-                    }
-                }
             }
         }
         
@@ -201,52 +160,6 @@ pipeline {
                             sed -i 's/versionName \".*\"/versionName \"${params.VERSION_NAME}\"/' ${APP_DIR}/android/appdata/build.gradle
                         """
                     }
-                }
-            }
-        }
-        
-        // 🔧 Stage 6: Gradle 정리
-        stage('Clean') {
-            steps {
-                script {
-                    echo "========================================="
-                    echo "Gradle 정리"
-                    echo "========================================="
-
-                    sh '''
-                        # Gradle 플러그인 충돌 방지: appdata/node_modules 제거
-                        if [ -d "${APP_DIR}/node_modules" ] || [ -L "${APP_DIR}/node_modules" ]; then
-                            echo "⚠️  ${APP_DIR}/node_modules 제거 중..."
-                            rm -rf ${APP_DIR}/node_modules
-                            echo "✅ ${APP_DIR}/node_modules 제거 완료"
-                        fi
-
-                        # node_modules 내의 Gradle 플러그인 빌드 결과물 삭제
-                        echo "🗑️  node_modules Gradle 플러그인 빌드 결과물 삭제 중..."
-                        rm -rf node_modules/@react-native/gradle-plugin/*/build
-                        rm -rf node_modules/expo-modules-autolinking/android/expo-gradle-plugin/*/build
-                        rm -rf node_modules/expo-modules-core/android/build
-                        echo "✅ 플러그인 빌드 결과물 삭제 완료"
-
-                        # Kotlin 2.1.20 캐시 완전 삭제
-                        echo "🗑️  Kotlin 2.1.20 캐시 삭제 중..."
-                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.1.20
-                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/2.1.20
-                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/2.1.20
-                        rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/2.1.20
-                        rm -rf ~/.gradle/caches/*/kotlin-compiler-embeddable-2.1.20*
-                        echo "✅ Kotlin 2.1.20 캐시 삭제 완료"
-
-                        # 프로젝트 로컬 캐시도 삭제
-                        cd ${APP_DIR}/android
-                        rm -rf .gradle
-                        rm -rf build
-                        rm -rf appdata/build
-
-                        chmod +x gradlew
-                        ./gradlew clean --no-build-cache
-                        echo "✅ Gradle 정리 완료"
-                    '''
                 }
             }
         }
@@ -357,27 +270,6 @@ pipeline {
             }
         }
         
-        // 🔧 Stage 10: 테스트 (선택사항)
-        stage('Test') {
-            when {
-                expression { params.BUILD_VARIANT == 'release' }
-            }
-            steps {
-                script {
-                    echo "========================================="
-                    echo "테스트 실행"
-                    echo "========================================="
-                    
-                    catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                        sh '''
-                            cd ${APP_DIR}/android
-                            chmod +x gradlew
-                            ./gradlew test || echo "⚠️  테스트 실패"
-                        '''
-                    }
-                }
-            }
-        }
     }
     
     // 🔧 빌드 후 처리
