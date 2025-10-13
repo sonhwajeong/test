@@ -139,6 +139,19 @@ pipeline {
                 sh '''
                     echo "🔧 빌드 환경 준비 중..."
 
+                    # React Native 0.79+ 호환성 패치: ReactAndroid 디렉토리 생성
+                    echo "🔧 React Native 0.79 호환성 패치 중..."
+                    RN_DIR="${APP_DIR}/node_modules/react-native"
+
+                    if [ -f "$RN_DIR/gradle.properties" ] && [ ! -d "$RN_DIR/ReactAndroid" ]; then
+                        echo "📁 ReactAndroid 디렉토리 생성 중..."
+                        mkdir -p "$RN_DIR/ReactAndroid"
+                        cp "$RN_DIR/gradle.properties" "$RN_DIR/ReactAndroid/gradle.properties"
+                        echo "✅ ReactAndroid/gradle.properties 복사 완료"
+                    else
+                        echo "⚠️  이미 ReactAndroid 디렉토리가 존재하거나 gradle.properties를 찾을 수 없습니다"
+                    fi
+
                     # React Native 플러그인 패치
                     echo "🔧 React Native 플러그인 패치 중..."
                     find . -path "*/node_modules/@react-native/gradle-plugin/*/src/main/kotlin/com/facebook/react/ReactRootProjectPlugin.kt" -type f -exec sed -i 's/:app/:appdata/g' {} + 2>/dev/null || true
