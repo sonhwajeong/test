@@ -76,7 +76,7 @@ pipeline {
 
                         echo "\nGradle 버전:"
                         if [ -f ${APP_DIR}/android/gradlew ]; then
-                            cd ${APP_DIR}/android && ./gradlew --version
+                            cd ${APP_DIR} && ./android/gradlew --version
                         else
                             echo "⚠️  gradlew를 찾을 수 없어 Gradle 버전 확인을 건너뜁니다."
                         fi
@@ -198,15 +198,16 @@ pipeline {
                     def variant = params.BUILD_VARIANT.capitalize()
                     
                     sh """
-                        cd ${APP_DIR}/android
-                        chmod +x gradlew
+                        # 🔧 Monorepo: apps/appdata에서 Gradle 실행 (React Native config 경로 문제 해결)
+                        cd ${APP_DIR}
+                        chmod +x android/gradlew
 
                         # 환경변수 확인
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
 
                         # APK 빌드
-                        ./gradlew assemble${variant} \
+                        ./android/gradlew -p android assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -217,7 +218,7 @@ pipeline {
                         echo "✅ APK 빌드 완료"
 
                         # 빌드된 APK 확인
-                        ls -lh appdata/build/outputs/apk/${params.BUILD_VARIANT}/
+                        ls -lh android/appdata/build/outputs/apk/${params.BUILD_VARIANT}/
                     """
                 }
             }
@@ -237,11 +238,12 @@ pipeline {
                     def variant = params.BUILD_VARIANT.capitalize()
                     
                     sh """
-                        cd ${APP_DIR}/android
-                        chmod +x gradlew
+                        # 🔧 Monorepo: apps/appdata에서 Gradle 실행 (React Native config 경로 문제 해결)
+                        cd ${APP_DIR}
+                        chmod +x android/gradlew
 
                         # AAB 빌드
-                        ./gradlew bundle${variant} \
+                        ./android/gradlew -p android bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -252,7 +254,7 @@ pipeline {
                         echo "✅ AAB 빌드 완료"
 
                         # 빌드된 AAB 확인
-                        ls -lh appdata/build/outputs/bundle/${params.BUILD_VARIANT}/
+                        ls -lh android/appdata/build/outputs/bundle/${params.BUILD_VARIANT}/
                     """
                 }
             }
