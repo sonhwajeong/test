@@ -215,6 +215,18 @@ pipeline {
                         cd ${APP_DIR}
                         chmod +x android/gradlew
 
+                        # 🔧 React Native 0.79+ 호환성 패치: ReactAndroid 디렉토리 생성
+                        echo "🔧 React Native 0.79 호환성 패치 중..."
+                        if [ -f "node_modules/react-native/gradle.properties" ]; then
+                            mkdir -p node_modules/react-native/ReactAndroid
+                            cp node_modules/react-native/gradle.properties node_modules/react-native/ReactAndroid/gradle.properties
+                            echo "✅ ReactAndroid/gradle.properties 생성 완료"
+                            ls -la node_modules/react-native/ReactAndroid/
+                        else
+                            echo "❌ gradle.properties를 찾을 수 없습니다"
+                            exit 1
+                        fi
+
                         # 환경변수 확인
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
@@ -254,6 +266,17 @@ pipeline {
                         # 🔧 Monorepo: apps/appdata에서 Gradle 실행 (React Native config 경로 문제 해결)
                         cd ${APP_DIR}
                         chmod +x android/gradlew
+
+                        # 🔧 React Native 0.79+ 호환성 패치: ReactAndroid 디렉토리 생성
+                        echo "🔧 React Native 0.79 호환성 패치 중..."
+                        if [ -f "node_modules/react-native/gradle.properties" ]; then
+                            mkdir -p node_modules/react-native/ReactAndroid
+                            cp node_modules/react-native/gradle.properties node_modules/react-native/ReactAndroid/gradle.properties
+                            echo "✅ ReactAndroid/gradle.properties 생성 완료"
+                        else
+                            echo "❌ gradle.properties를 찾을 수 없습니다"
+                            exit 1
+                        fi
 
                         # AAB 빌드
                         ./android/gradlew -p android bundle${variant} \
