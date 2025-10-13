@@ -48,3 +48,12 @@ allprojects {
 
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
+
+// 🔧 Monorepo: React Native autolinking 태스크에 올바른 프로젝트 루트 전달
+subprojects { subproject ->
+  afterEvaluate {
+    subproject.tasks.withType(com.facebook.react.tasks.GeneratePackageListTask).configureEach { task ->
+      task.reactRoot.set(projectRoot)
+    }
+  }
+}
