@@ -113,13 +113,33 @@ pipeline {
             }
         }
         
-        // 🔧 Stage 3: 환경 준비
+        // 🔧 Stage 3: 의존성 설치 (선택사항)
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    echo "📦 의존성 설치 중..."
+
+                    # 루트에서 npm install
+                    npm install --no-optional --force
+
+                    # Shared 패키지 빌드
+                    echo "📦 Shared 패키지 빌드 중..."
+                    cd packages/shared
+                    npm run build
+                    cd ../..
+
+                    echo "✅ 의존성 설치 완료"
+                '''
+            }
+        }
+
+        // 🔧 Stage 4: 환경 준비
         stage('Prepare Build') {
             steps {
                 sh '''
                     echo "🔧 빌드 환경 준비 중..."
 
-                    # React Native 플러그인 패치 (node_modules가 커밋되어 있다고 가정)
+                    # React Native 플러그인 패치
                     echo "🔧 React Native 플러그인 패치 중..."
                     find . -path "*/node_modules/@react-native/gradle-plugin/*/src/main/kotlin/com/facebook/react/ReactRootProjectPlugin.kt" -type f -exec sed -i 's/:app/:appdata/g' {} + 2>/dev/null || true
                     echo "✅ 플러그인 패치 완료"
