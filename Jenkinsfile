@@ -16,8 +16,8 @@ pipeline {
         APP_DIR = 'apps/appdata'
 
         // 빌드 출력 경로
-        APK_OUTPUT_DIR = "${APP_DIR}/android/app/build/outputs/apk/release"
-        AAB_OUTPUT_DIR = "${APP_DIR}/android/app/build/outputs/bundle/release"
+        APK_OUTPUT_DIR = "${APP_DIR}/android/appdata/build/outputs/apk/release"
+        AAB_OUTPUT_DIR = "${APP_DIR}/android/appdata/build/outputs/bundle/release"
     }
     
     // 🔧 빌드 파라미터
@@ -147,6 +147,11 @@ pipeline {
                     fi
 
                     echo "✅ 의존성 설치 완료"
+
+                    echo "🔧 React Native 플러그인 패치 중..."
+                    # :app을 :appdata로 변경
+                    find node_modules/@react-native/gradle-plugin -name "ReactRootProjectPlugin.kt" -type f -exec sed -i 's/:app/:appdata/g' {} +
+                    echo "✅ 플러그인 패치 완료"
                 '''
             }
         }
@@ -186,14 +191,14 @@ pipeline {
                     if (params.VERSION_CODE != '') {
                         echo "버전 코드: ${params.VERSION_CODE}"
                         sh """
-                            sed -i 's/versionCode [0-9]*/versionCode ${params.VERSION_CODE}/' ${APP_DIR}/android/app/build.gradle
+                            sed -i 's/versionCode [0-9]*/versionCode ${params.VERSION_CODE}/' ${APP_DIR}/android/appdata/build.gradle
                         """
                     }
-                    
+
                     if (params.VERSION_NAME != '') {
                         echo "버전 이름: ${params.VERSION_NAME}"
                         sh """
-                            sed -i 's/versionName \".*\"/versionName \"${params.VERSION_NAME}\"/' ${APP_DIR}/android/app/build.gradle
+                            sed -i 's/versionName \".*\"/versionName \"${params.VERSION_NAME}\"/' ${APP_DIR}/android/appdata/build.gradle
                         """
                     }
                 }
@@ -236,7 +241,7 @@ pipeline {
                         cd ${APP_DIR}/android
                         rm -rf .gradle
                         rm -rf build
-                        rm -rf app/build
+                        rm -rf appdata/build
 
                         chmod +x gradlew
                         ./gradlew clean --no-build-cache
@@ -279,7 +284,7 @@ pipeline {
                         echo "✅ APK 빌드 완료"
 
                         # 빌드된 APK 확인
-                        ls -lh app/build/outputs/apk/${params.BUILD_VARIANT}/
+                        ls -lh appdata/build/outputs/apk/${params.BUILD_VARIANT}/
                     """
                 }
             }
@@ -314,7 +319,7 @@ pipeline {
                         echo "✅ AAB 빌드 완료"
 
                         # 빌드된 AAB 확인
-                        ls -lh app/build/outputs/bundle/${params.BUILD_VARIANT}/
+                        ls -lh appdata/build/outputs/bundle/${params.BUILD_VARIANT}/
                     """
                 }
             }
@@ -343,7 +348,7 @@ pipeline {
                     }
                     
                     // 매핑 파일 보관 (ProGuard)
-                    archiveArtifacts artifacts: "${APP_DIR}/android/app/build/outputs/mapping/**/*",
+                    archiveArtifacts artifacts: "${APP_DIR}/android/appdata/build/outputs/mapping/**/*",
                                     allowEmptyArchive: true,
                                     fingerprint: true
                     
