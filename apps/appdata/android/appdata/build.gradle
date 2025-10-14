@@ -19,7 +19,8 @@ react {
     cliFile = file("$projectRoot/node_modules/@expo/cli/build/bin/cli")
 
     // Node 실행 경로 (Jenkins에서도 작동하도록)
-    nodeExecutableAndArgs = ["node"]
+    // 🔧 중요: react-native config가 올바른 디렉토리에서 실행되도록 cwd 설정
+    nodeExecutableAndArgs = ["node", "-e", "process.chdir('$projectRoot'); process.argv[1] = require.resolve(process.argv[1]); require(process.argv[1])", "--"]
 
     entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, file(projectRoot)).text.trim())
     hermesCommand = "$projectRoot/node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
