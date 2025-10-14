@@ -216,47 +216,16 @@ pipeline {
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
 
-                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사/생성
-                        echo "📄 설정 파일 생성 중..."
-                        cp package.json android/package.json
-                        cp app.json android/app.json
-
-                        # node_modules 심볼릭 링크 생성 (react-native CLI가 패키지를 찾을 수 있도록)
-                        if [ ! -e android/node_modules ]; then
-                            echo "📁 node_modules 심볼릭 링크 생성 중..."
-                            ln -s "\$(pwd)/../node_modules" android/node_modules
-                            echo "✅ node_modules 심볼릭 링크 생성 완료"
-                        fi
-
-                        # react-native.config.js를 android 폴더용으로 수정 (상대 경로 -> 절대 경로)
-                        cat > android/react-native.config.js << 'EOF'
-module.exports = {
-  project: {
-    android: {
-      sourceDir: '.',
-      appName: 'appdata',
-      packageName: 'com.anonymous.app',
-      manifestPath: './appdata/src/main/AndroidManifest.xml',
-    },
-  },
-};
-EOF
-                        echo "✅ 설정 파일 생성 완료"
-
-                        # 생성된 파일 확인
-                        echo "생성된 react-native.config.js:"
-                        cat android/react-native.config.js
-
                         # Gradle wrapper 권한 설정
                         chmod +x android/gradlew
 
-                        # APK 빌드 (android 디렉토리에서 실행)
-                        cd android
-
-                        # 디버깅: react-native config 출력 확인
+                        # 🔧 디버깅: react-native config 출력 확인 (apps/appdata 경로에서)
                         echo "🔍 react-native config 출력:"
                         npx react-native config || echo "react-native config 실패"
-                        ./gradlew assemble${variant} \
+
+                        # 🔧 APK 빌드 (apps/appdata 경로에서 android/gradlew 실행)
+                        # 이렇게 하면 react-native.config.js가 올바르게 읽힘
+                        ./android/gradlew -p android assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -267,7 +236,6 @@ EOF
                         echo "✅ APK 빌드 완료"
 
                         # 빌드된 APK 확인
-                        cd ..
                         ls -lh android/appdata/build/outputs/apk/${params.BUILD_VARIANT}/
                     """
                 }
@@ -309,47 +277,16 @@ EOF
 
                         echo "현재 작업 디렉토리: \$(pwd)"
 
-                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사/생성
-                        echo "📄 설정 파일 생성 중..."
-                        cp package.json android/package.json
-                        cp app.json android/app.json
-
-                        # node_modules 심볼릭 링크 생성 (react-native CLI가 패키지를 찾을 수 있도록)
-                        if [ ! -e android/node_modules ]; then
-                            echo "📁 node_modules 심볼릭 링크 생성 중..."
-                            ln -s "\$(pwd)/../node_modules" android/node_modules
-                            echo "✅ node_modules 심볼릭 링크 생성 완료"
-                        fi
-
-                        # react-native.config.js를 android 폴더용으로 수정 (상대 경로 -> 절대 경로)
-                        cat > android/react-native.config.js << 'EOF'
-module.exports = {
-  project: {
-    android: {
-      sourceDir: '.',
-      appName: 'appdata',
-      packageName: 'com.anonymous.app',
-      manifestPath: './appdata/src/main/AndroidManifest.xml',
-    },
-  },
-};
-EOF
-                        echo "✅ 설정 파일 생성 완료"
-
-                        # 생성된 파일 확인
-                        echo "생성된 react-native.config.js:"
-                        cat android/react-native.config.js
-
                         # Gradle wrapper 권한 설정
                         chmod +x android/gradlew
 
-                        # AAB 빌드 (android 디렉토리에서 실행)
-                        cd android
-
-                        # 디버깅: react-native config 출력 확인
+                        # 🔧 디버깅: react-native config 출력 확인 (apps/appdata 경로에서)
                         echo "🔍 react-native config 출력:"
                         npx react-native config || echo "react-native config 실패"
-                        ./gradlew bundle${variant} \
+
+                        # 🔧 AAB 빌드 (apps/appdata 경로에서 android/gradlew 실행)
+                        # 이렇게 하면 react-native.config.js가 올바르게 읽힘
+                        ./android/gradlew -p android bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -360,7 +297,6 @@ EOF
                         echo "✅ AAB 빌드 완료"
 
                         # 빌드된 AAB 확인
-                        cd ..
                         ls -lh android/appdata/build/outputs/bundle/${params.BUILD_VARIANT}/
                     """
                 }
