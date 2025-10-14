@@ -216,12 +216,29 @@ pipeline {
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
 
-                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사
-                        echo "📄 설정 파일 복사 중..."
+                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사/생성
+                        echo "📄 설정 파일 생성 중..."
                         cp package.json android/package.json
-                        cp react-native.config.js android/react-native.config.js
                         cp app.json android/app.json
-                        echo "✅ 설정 파일 복사 완료"
+
+                        # react-native.config.js를 android 폴더용으로 수정 (상대 경로 -> 절대 경로)
+                        cat > android/react-native.config.js << 'EOF'
+module.exports = {
+  project: {
+    android: {
+      sourceDir: '.',
+      appName: 'appdata',
+      packageName: 'com.anonymous.app',
+      manifestPath: './appdata/src/main/AndroidManifest.xml',
+    },
+  },
+};
+EOF
+                        echo "✅ 설정 파일 생성 완료"
+
+                        # 생성된 파일 확인
+                        echo "생성된 react-native.config.js:"
+                        cat android/react-native.config.js
 
                         # Gradle wrapper 권한 설정
                         chmod +x android/gradlew
@@ -281,12 +298,29 @@ pipeline {
 
                         echo "현재 작업 디렉토리: \$(pwd)"
 
-                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사
-                        echo "📄 설정 파일 복사 중..."
+                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사/생성
+                        echo "📄 설정 파일 생성 중..."
                         cp package.json android/package.json
-                        cp react-native.config.js android/react-native.config.js
                         cp app.json android/app.json
-                        echo "✅ 설정 파일 복사 완료"
+
+                        # react-native.config.js를 android 폴더용으로 수정 (상대 경로 -> 절대 경로)
+                        cat > android/react-native.config.js << 'EOF'
+module.exports = {
+  project: {
+    android: {
+      sourceDir: '.',
+      appName: 'appdata',
+      packageName: 'com.anonymous.app',
+      manifestPath: './appdata/src/main/AndroidManifest.xml',
+    },
+  },
+};
+EOF
+                        echo "✅ 설정 파일 생성 완료"
+
+                        # 생성된 파일 확인
+                        echo "생성된 react-native.config.js:"
+                        cat android/react-native.config.js
 
                         chmod +x android/gradlew
 
