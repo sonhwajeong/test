@@ -225,7 +225,8 @@ pipeline {
 
                         # 🔧 APK 빌드 (apps/appdata 경로에서 android/gradlew 실행)
                         # 이렇게 하면 react-native.config.js가 올바르게 읽힘
-                        ./android/gradlew -p android assemble${variant} \
+                        # EXPO_USE_COMMUNITY_AUTOLINKING=1 설정으로 Expo autolinking 대신 React Native 표준 autolinking 사용
+                        EXPO_USE_COMMUNITY_AUTOLINKING=1 ./android/gradlew -p android assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -286,7 +287,8 @@ pipeline {
 
                         # 🔧 AAB 빌드 (apps/appdata 경로에서 android/gradlew 실행)
                         # 이렇게 하면 react-native.config.js가 올바르게 읽힘
-                        ./android/gradlew -p android bundle${variant} \
+                        # EXPO_USE_COMMUNITY_AUTOLINKING=1 설정으로 Expo autolinking 대신 React Native 표준 autolinking 사용
+                        EXPO_USE_COMMUNITY_AUTOLINKING=1 ./android/gradlew -p android bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \

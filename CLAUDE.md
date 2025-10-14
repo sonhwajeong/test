@@ -101,22 +101,31 @@ A `Jenkinsfile` is provided for Android builds with the following configuration:
 1. **Environment Check**: Verifies Node.js, npm, Java, Gradle versions
 2. **Checkout**: Clones repository and shows git info
 3. **Install Dependencies**: Installs npm dependencies with `--no-optional --force` to skip platform-specific optional packages (e.g., `lightningcss-win32-x64-msvc` on Linux)
-4. **Lint**: Runs linting (conditional, only for release builds)
+4. **Prepare Build**: Patches React Native Gradle Plugin to use `:appdata` instead of `:app`
 5. **Set Version**: Updates versionCode/versionName in build.gradle (optional)
-6. **Clean**: Runs Gradle clean
-7. **Build APK/AAB**: Builds Android artifacts using Gradle
-8. **Archive Artifacts**: Archives APKs, AABs, and ProGuard mapping files
-9. **Test**: Runs Gradle tests (conditional)
+6. **Build APK/AAB**: Builds Android artifacts using Gradle with `EXPO_USE_COMMUNITY_AUTOLINKING=1` to use React Native standard autolinking instead of Expo's autolinking
+7. **Archive Artifacts**: Archives APKs, AABs, and ProGuard mapping files
+8. **Test**: Runs Gradle tests (conditional)
 
-### Jenkins Issues:
-- **Missing gradlew**: `apps/appdata/android` lacks a `gradlew` wrapper script. Builds will fail at the "Environment Check" stage.
-- **Platform-specific dependencies**: Use `npm install --no-optional --force` to avoid errors installing Windows-specific packages like `lightningcss-win32-x64-msvc` on Linux Jenkins agents.
-- **Missing app source**: `apps/appdata` contains only build artifacts, not a complete React Native/Expo app source.
+### Jenkins Issues and Solutions:
+- **Autolinking Error**: Expo's autolinking generates `autolinking.json` with a different format than React Native Gradle Plugin expects
+  - Error: `RNGP - Autolinking: Could not find project.android.packageName in react-native config output!`
+  - Solution: Set `EXPO_USE_COMMUNITY_AUTOLINKING=1` environment variable when running Gradle builds
+  - This forces the use of React Native's standard autolinking instead of Expo's custom autolinking
+  - The Jenkinsfile has been updated to include this environment variable in the Gradle build commands
+- **Missing gradlew**: `apps/appdata/android` previously lacked a `gradlew` wrapper script (now resolved)
+- **Platform-specific dependencies**: Use `npm install --no-optional --force` to avoid errors installing Windows-specific packages like `lightningcss-win32-x64-msvc` on Linux Jenkins agents
+- **Missing app source**: `apps/appdata` contains only build artifacts, not a complete React Native/Expo app source
 
 ## Common Issues
 
 ### Android Build Issues in Jenkins
-- **Missing gradlew wrapper**: The `apps/appdata/android` directory lacks `gradlew` and `gradlew.bat` scripts
+- **Expo Autolinking Incompatibility**: Expo's autolinking generates `autolinking.json` in a format incompatible with React Native Gradle Plugin
+  - Error: `RNGP - Autolinking: Could not find project.android.packageName in react-native config output!`
+  - Root Cause: Expo autolinking generates JSON with `root` and `reactNativePath` fields, but React Native Gradle Plugin expects `reactNativeVersion` at the root level. This mismatch causes JSON parsing to fail silently, resulting in null values.
+  - Solution: Set `EXPO_USE_COMMUNITY_AUTOLINKING=1` environment variable when running Gradle builds to force React Native standard autolinking
+  - The Jenkinsfile has been updated with this fix: `EXPO_USE_COMMUNITY_AUTOLINKING=1 ./android/gradlew ...`
+- **Missing gradlew wrapper**: The `apps/appdata/android` directory previously lacked `gradlew` and `gradlew.bat` scripts (now resolved)
   - Solution: Copy Gradle wrapper from a React Native/Expo project or run `gradle wrapper` in the android directory
   - Ensure gradlew has execute permissions: `chmod +x apps/appdata/android/gradlew`
 - **Platform-specific optional dependencies**: Installing `lightningcss-win32-x64-msvc` on Linux causes `EBADPLATFORM` errors
