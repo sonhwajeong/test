@@ -221,6 +221,13 @@ pipeline {
                         cp package.json android/package.json
                         cp app.json android/app.json
 
+                        # node_modules 심볼릭 링크 생성 (react-native CLI가 패키지를 찾을 수 있도록)
+                        if [ ! -e android/node_modules ]; then
+                            echo "📁 node_modules 심볼릭 링크 생성 중..."
+                            ln -s "\$(pwd)/../node_modules" android/node_modules
+                            echo "✅ node_modules 심볼릭 링크 생성 완료"
+                        fi
+
                         # react-native.config.js를 android 폴더용으로 수정 (상대 경로 -> 절대 경로)
                         cat > android/react-native.config.js << 'EOF'
 module.exports = {
@@ -245,6 +252,10 @@ EOF
 
                         # APK 빌드 (android 디렉토리에서 실행)
                         cd android
+
+                        # 디버깅: react-native config 출력 확인
+                        echo "🔍 react-native config 출력:"
+                        npx react-native config || echo "react-native config 실패"
                         ./gradlew assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
@@ -303,6 +314,13 @@ EOF
                         cp package.json android/package.json
                         cp app.json android/app.json
 
+                        # node_modules 심볼릭 링크 생성 (react-native CLI가 패키지를 찾을 수 있도록)
+                        if [ ! -e android/node_modules ]; then
+                            echo "📁 node_modules 심볼릭 링크 생성 중..."
+                            ln -s "\$(pwd)/../node_modules" android/node_modules
+                            echo "✅ node_modules 심볼릭 링크 생성 완료"
+                        fi
+
                         # react-native.config.js를 android 폴더용으로 수정 (상대 경로 -> 절대 경로)
                         cat > android/react-native.config.js << 'EOF'
 module.exports = {
@@ -322,10 +340,15 @@ EOF
                         echo "생성된 react-native.config.js:"
                         cat android/react-native.config.js
 
+                        # Gradle wrapper 권한 설정
                         chmod +x android/gradlew
 
                         # AAB 빌드 (android 디렉토리에서 실행)
                         cd android
+
+                        # 디버깅: react-native config 출력 확인
+                        echo "🔍 react-native config 출력:"
+                        npx react-native config || echo "react-native config 실패"
                         ./gradlew bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
