@@ -216,11 +216,19 @@ pipeline {
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
 
+                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사
+                        echo "📄 설정 파일 복사 중..."
+                        cp package.json android/package.json
+                        cp react-native.config.js android/react-native.config.js
+                        cp app.json android/app.json
+                        echo "✅ 설정 파일 복사 완료"
+
                         # Gradle wrapper 권한 설정
                         chmod +x android/gradlew
 
-                        # APK 빌드 (apps/appdata를 작업 디렉토리로 유지하고 -p android 사용)
-                        ./android/gradlew -p android assemble${variant} \
+                        # APK 빌드 (android 디렉토리에서 실행)
+                        cd android
+                        ./gradlew assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -231,6 +239,7 @@ pipeline {
                         echo "✅ APK 빌드 완료"
 
                         # 빌드된 APK 확인
+                        cd ..
                         ls -lh android/appdata/build/outputs/apk/${params.BUILD_VARIANT}/
                     """
                 }
@@ -271,10 +280,19 @@ pipeline {
                         cd ${APP_DIR}
 
                         echo "현재 작업 디렉토리: \$(pwd)"
+
+                        # 🔧 React Native autolinking을 위해 android 폴더에 설정 파일 복사
+                        echo "📄 설정 파일 복사 중..."
+                        cp package.json android/package.json
+                        cp react-native.config.js android/react-native.config.js
+                        cp app.json android/app.json
+                        echo "✅ 설정 파일 복사 완료"
+
                         chmod +x android/gradlew
 
-                        # AAB 빌드 (apps/appdata를 작업 디렉토리로 유지하고 -p android 사용)
-                        ./android/gradlew -p android bundle${variant} \
+                        # AAB 빌드 (android 디렉토리에서 실행)
+                        cd android
+                        ./gradlew bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
                             -PKEY_ALIAS=\${KEY_ALIAS} \
@@ -285,6 +303,7 @@ pipeline {
                         echo "✅ AAB 빌드 완료"
 
                         # 빌드된 AAB 확인
+                        cd ..
                         ls -lh android/appdata/build/outputs/bundle/${params.BUILD_VARIANT}/
                     """
                 }
