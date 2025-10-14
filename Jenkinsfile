@@ -210,13 +210,16 @@ pipeline {
 
                         # 🔧 Monorepo: apps/appdata에서 Gradle 실행 (React Native config 경로 문제 해결)
                         cd ${APP_DIR}
-                        chmod +x android/gradlew
 
                         # 환경변수 확인
+                        echo "현재 작업 디렉토리: \$(pwd)"
                         echo "KEYSTORE_PATH: \${KEYSTORE_PATH}"
                         echo "KEY_ALIAS: \${KEY_ALIAS}"
 
-                        # APK 빌드
+                        # Gradle wrapper 권한 설정
+                        chmod +x android/gradlew
+
+                        # APK 빌드 (apps/appdata를 작업 디렉토리로 유지하고 -p android 사용)
                         ./android/gradlew -p android assemble${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
@@ -266,9 +269,11 @@ pipeline {
 
                         # 🔧 Monorepo: apps/appdata에서 Gradle 실행 (React Native config 경로 문제 해결)
                         cd ${APP_DIR}
+
+                        echo "현재 작업 디렉토리: \$(pwd)"
                         chmod +x android/gradlew
 
-                        # AAB 빌드
+                        # AAB 빌드 (apps/appdata를 작업 디렉토리로 유지하고 -p android 사용)
                         ./android/gradlew -p android bundle${variant} \
                             -PKEYSTORE_PATH=\${KEYSTORE_PATH} \
                             -PKEYSTORE_PASSWORD=\${KEYSTORE_PASSWORD} \
