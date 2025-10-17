@@ -298,7 +298,8 @@ export default function StoresPage() {
 
     } catch (error) {
       console.error('지도 초기화 오류:', error)
-      setMapError(`지도 초기화 실패: ${error.message}`)
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
+      setMapError(`지도 초기화 실패: ${errorMessage}`)
       setMapLoading(false)
     }
   }
