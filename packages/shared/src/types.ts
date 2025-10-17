@@ -19,6 +19,7 @@ export interface LoginResponse {
   user: User;
   biometricEligible: boolean;
   success: boolean;
+  error?: string;
 }
 
 export interface TokenCheckRequest {
