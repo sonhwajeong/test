@@ -20,6 +20,7 @@ interface Store {
   openTime: string
   closeTime: string
   description?: string
+  distance?: number
 }
 
 export default function StoresPage() {
@@ -454,7 +455,7 @@ export default function StoresPage() {
             >
               <div style={styles.storeHeader}>
                 <h4 style={styles.storeName}>{store.name}</h4>
-                {'distance' in store && (
+                {store.distance !== undefined && (
                   <span style={styles.distance}>{formatDistance(store.distance)}</span>
                 )}
               </div>
