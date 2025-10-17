@@ -85,7 +85,7 @@ export default function LoginPage() {
         // 성공 화면 표시
         setUser(result.user);
       } else {
-        setError(result.error);
+        setError(result.error || '로그인에 실패했습니다.');
       }
     } catch (err) {
       setError('네트워크 오류가 발생했습니다.');
