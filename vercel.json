@@ -4,7 +4,7 @@
   "name": "myapp-web",
   "buildCommand": "npm install && npm run build:shared && npm run build:web",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "npm ci --no-optional",
+  "installCommand": "npm install --no-optional --force",
   "framework": "nextjs",
   "build": {
     "env": {
