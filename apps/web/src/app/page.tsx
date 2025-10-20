@@ -8,7 +8,7 @@ export default function Home() {
 
   return (
     <main style={{ padding: '20px' }}>
-      <h1>MyApp</h1>
+      <h1>앱테스트중</h1>
       
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <Link href="/login" style={{
