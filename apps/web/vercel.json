@@ -1,7 +1,5 @@
 {
-  "buildCommand": "cd ../../packages/shared && npm run build && cd ../../apps/web && npm run build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install --prefix ../.. --no-optional --force",
+  "buildCommand": "npm install --prefix ../.. --no-optional --force && npm run build:shared --prefix ../.. && npm run build --prefix ../..",
   "framework": "nextjs",
   "build": {
     "env": {

@@ -1,14 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "name": "myapp-web",
-  "buildCommand": "cd packages/shared && npm run build && cd ../apps/web && npm run build",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "npm install --no-optional --force",
-  "framework": "nextjs",
-  "build": {
-    "env": {
-      "NODE_VERSION": "18"
-    }
-  }
+  "version": 2
 }

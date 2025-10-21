@@ -1,0 +1,17 @@
+# Monorepo: ignore everything except web app source
+apps/appdata/
+packages/shared/dist/
+
+# Build artifacts
+*.apk
+*.aab
+android/
+*.gradle
+
+# Unnecessary for deployment
+.git/
+.github/
+Jenkinsfile
+CLAUDE.md
+*.md
+!apps/web/**/*.md
