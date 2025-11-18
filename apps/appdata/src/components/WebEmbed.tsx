@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { authService } from '../services/auth';
 import { storageService } from '../services/storage';
 import * as Location from 'expo-location';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 interface WebEmbedProps {
   routePath: string;
@@ -244,9 +246,61 @@ export const WebEmbed: React.FC<WebEmbedProps> = ({ routePath, style, usePostMet
         // 웹에서 위치 정보 요청이 왔을 때 처리
         console.log('📍 웹에서 위치 정보 요청 받음');
         handleLocationRequest();
+      } else if (data.type === 'PDF_DOWNLOAD') {
+        // 웹에서 PDF 다운로드 요청이 왔을 때 처리
+        console.log('📄 웹에서 PDF 다운로드 요청 받음:', data.fileName);
+        handlePDFDownload(data);
       }
     } catch (error) {
       console.error('Message handling error:', error);
+    }
+  };
+
+  const handlePDFDownload = async (data: any) => {
+    try {
+      console.log('📱 앱에서 PDF 저장 시작');
+
+      // Base64 data URI에서 Base64 데이터만 추출
+      const base64Data = data.pdfData.split(',')[1];
+
+      // 파일명과 경로 설정
+      const fileName = data.fileName || '근로계약서.pdf';
+      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+
+      // Base64 데이터를 파일로 저장
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      console.log('✅ PDF 파일 저장 완료:', fileUri);
+
+      // 파일 공유 가능 여부 확인
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (isAvailable) {
+        // 공유 시트 열기 (저장, 공유 등 가능)
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'PDF 저장',
+          UTI: 'com.adobe.pdf'
+        });
+        console.log('✅ PDF 공유 시트 열림');
+      } else {
+        // 공유 기능이 없는 경우 파일 위치 알림
+        Alert.alert(
+          'PDF 저장 완료',
+          `파일이 저장되었습니다:\n${fileUri}`,
+          [{ text: '확인' }]
+        );
+      }
+
+    } catch (error) {
+      console.error('❌ PDF 저장 실패:', error);
+      Alert.alert(
+        'PDF 저장 실패',
+        `PDF 파일을 저장하는 중 오류가 발생했습니다: ${error.message}`,
+        [{ text: '확인' }]
+      );
     }
   };
 

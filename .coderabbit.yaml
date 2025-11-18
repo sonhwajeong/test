@@ -1,0 +1,87 @@
+# CodeRabbit Configuration
+# AI 기반 코드 리뷰 설정
+
+# 리뷰 설정
+reviews:
+  # 리뷰 프로필: "chill" (친절한 톤) 또는 "assertive" (단호한 톤)
+  profile: "chill"
+
+  # 높은 수준의 요약 제공
+  high_level_summary: true
+
+  # 시(poem) 형태의 요약 비활성화
+  poem: false
+
+  # 리뷰 상태 표시
+  review_status: true
+
+  # PR 변경 요청 워크플로우
+  request_changes_workflow: false
+
+  # 자동 리뷰 활성화
+  auto_review:
+    enabled: true
+
+  # 코드 품질 체크
+  tools:
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+
+# 채팅 설정
+chat:
+  # 자동 답변 활성화
+  auto_reply: true
+
+# 언어 설정
+language: "ko-KR"
+
+# 경로 필터 설정
+path_filters:
+  # 리뷰에서 제외할 경로
+  excluded:
+    # 테스트 파일
+    - "**/*.test.ts"
+    - "**/*.test.tsx"
+    - "**/*.spec.ts"
+    - "**/*.spec.tsx"
+
+    # 빌드 출력물
+    - "**/dist/**"
+    - "**/.next/**"
+    - "**/build/**"
+    - "**/.turbo/**"
+
+    # Android 빌드 아티팩트
+    - "**/apps/appdata/android/.gradle/**"
+    - "**/apps/appdata/android/build/**"
+    - "**/apps/appdata/android/app/build/**"
+
+    # 의존성 및 캐시
+    - "**/node_modules/**"
+    - "**/.vercel/**"
+    - "**/coverage/**"
+
+    # 설정 파일 (필요시 주석 해제)
+    # - "**/package-lock.json"
+    # - "**/tsconfig.json"
+
+    # 기타
+    - "**/*.min.js"
+    - "**/*.min.css"
+    - "**/*.map"
+
+# 리뷰에 포함할 경로 (선택사항)
+# path_filters:
+#   included:
+#     - "apps/web/src/**"
+#     - "packages/shared/src/**"
+
+# 커스텀 지침 (선택사항)
+# instructions: |
+#   - TypeScript 타입 안정성에 집중해주세요
+#   - Next.js 14 App Router 베스트 프랙티스를 따르는지 확인해주세요
+#   - 모노레포 의존성 관리에 주의해주세요

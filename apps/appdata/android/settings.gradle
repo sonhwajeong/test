@@ -23,7 +23,10 @@ plugins {
 }
 
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-  if (System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1') {
+  def useCommunityAutolinking = System.getenv('EXPO_USE_COMMUNITY_AUTOLINKING') == '1' ||
+                                  providers.gradleProperty('EXPO_USE_COMMUNITY_AUTOLINKING').getOrElse('0') == '1'
+
+  if (useCommunityAutolinking) {
     ex.autolinkLibrariesFromCommand()
   } else {
     ex.autolinkLibrariesFromCommand(expoAutolinking.rnConfigCommand)

@@ -11,8 +11,12 @@ const addHoverStyles = () => {
       const style = document.createElement('style')
       style.id = styleId
       style.textContent = `
-        .menu-item:hover {
-          background-color: #f5f5f5;
+        .feature-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+        .quick-action:hover {
+          background-color: #f8f9fa;
         }
       `
       document.head.appendChild(style)
@@ -68,12 +72,15 @@ export default function HomePage() {
       <Header />
 
       <div style={styles.content}>
-        <h1 style={styles.title}>홈</h1>
+        <div style={styles.welcomeSection}>
+          <h1 style={styles.welcomeTitle}>안녕하세요</h1>
+          <p style={styles.welcomeSubtitle}>오늘은 무엇을 도와드릴까요?</p>
+        </div>
 
-        <div style={styles.menuList}>
+        <div style={styles.featuresSection}>
           <div
-            className="menu-item"
-            style={styles.menuItem}
+            className="feature-card"
+            style={styles.featureCard}
             onClick={() => {
               if (typeof window !== 'undefined') {
                 if ((window as any).ReactNativeWebView) {
@@ -84,12 +91,16 @@ export default function HomePage() {
               }
             }}
           >
-            <span style={styles.menuText}>추천 상품</span>
+            <div style={styles.featureIcon}>✨</div>
+            <div style={styles.featureContent}>
+              <h3 style={styles.featureTitle}>추천 상품</h3>
+              <p style={styles.featureDesc}>엄선된 상품을 만나보세요</p>
+            </div>
           </div>
 
           <div
-            className="menu-item"
-            style={styles.menuItem}
+            className="feature-card"
+            style={styles.featureCard}
             onClick={() => {
               if (typeof window !== 'undefined') {
                 if ((window as any).ReactNativeWebView) {
@@ -100,35 +111,68 @@ export default function HomePage() {
               }
             }}
           >
-            <span style={styles.menuText}>새로운 소식</span>
+            <div style={styles.featureIcon}>📢</div>
+            <div style={styles.featureContent}>
+              <h3 style={styles.featureTitle}>새로운 소식</h3>
+              <p style={styles.featureDesc}>최신 이벤트와 공지사항</p>
+            </div>
           </div>
 
           <div
-            className="menu-item"
-            style={styles.menuItem}
+            className="feature-card"
+            style={styles.featureCard}
             onClick={() => {
               if (typeof window !== 'undefined') {
                 if ((window as any).ReactNativeWebView) {
-                  window.location.href = '/cart'
+                  window.location.href = '/contract'
                 } else {
-                  window.open('/cart', '_blank')
+                  window.open('/contract', '_blank')
                 }
               }
             }}
           >
-            <span style={styles.menuText}>장바구니</span>
+            <div style={styles.featureIcon}>📝</div>
+            <div style={styles.featureContent}>
+              <h3 style={styles.featureTitle}>근로계약서</h3>
+              <p style={styles.featureDesc}>근로계약서 작성 및 서명</p>
+            </div>
           </div>
+        </div>
 
-          <div className="menu-item" style={styles.menuItem}>
-            <span style={styles.menuText}>찜목록</span>
-          </div>
+        <div style={styles.quickSection}>
+          <h2 style={styles.sectionTitle}>빠른 메뉴</h2>
+          <div style={styles.quickGrid}>
+            <div
+              className="quick-action"
+              style={styles.quickAction}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  if ((window as any).ReactNativeWebView) {
+                    window.location.href = '/cart'
+                  } else {
+                    window.open('/cart', '_blank')
+                  }
+                }
+              }}
+            >
+              <div style={styles.quickIcon}>🛒</div>
+              <span style={styles.quickLabel}>장바구니</span>
+            </div>
 
-          <div className="menu-item" style={styles.menuItem}>
-            <span style={styles.menuText}>쿠폰</span>
-          </div>
+            <div className="quick-action" style={styles.quickAction}>
+              <div style={styles.quickIcon}>❤️</div>
+              <span style={styles.quickLabel}>찜목록</span>
+            </div>
 
-          <div className="menu-item" style={styles.menuItem}>
-            <span style={styles.menuText}>고객센터</span>
+            <div className="quick-action" style={styles.quickAction}>
+              <div style={styles.quickIcon}>🎟️</div>
+              <span style={styles.quickLabel}>쿠폰</span>
+            </div>
+
+            <div className="quick-action" style={styles.quickAction}>
+              <div style={styles.quickIcon}>💬</div>
+              <span style={styles.quickLabel}>고객센터</span>
+            </div>
           </div>
         </div>
       </div>
@@ -139,41 +183,103 @@ export default function HomePage() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
     display: 'flex',
     flexDirection: 'column' as const,
   },
   content: {
     maxWidth: '800px',
     margin: '0 auto',
-    padding: '24px 16px',
+    padding: '32px 20px',
     flex: 1,
   },
-  title: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: '24px',
-    paddingBottom: '12px',
-    borderBottom: '1px solid #e5e5e5',
+  welcomeSection: {
+    marginBottom: '40px',
   },
-  menuList: {
+  welcomeTitle: {
+    fontSize: '32px',
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: '8px',
+    letterSpacing: '-0.5px',
+  },
+  welcomeSubtitle: {
+    fontSize: '16px',
+    color: '#6c757d',
+    fontWeight: '400',
+    margin: 0,
+  },
+  featuresSection: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '1px',
-    backgroundColor: '#e5e5e5',
-    borderRadius: '8px',
-    overflow: 'hidden',
+    gap: '16px',
+    marginBottom: '48px',
   },
-  menuItem: {
+  featureCard: {
     backgroundColor: '#fff',
-    padding: '16px 20px',
+    borderRadius: '16px',
+    padding: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s',
+    border: '1px solid #e9ecef',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+    transition: 'all 0.3s ease',
   },
-  menuText: {
-    fontSize: '16px',
-    color: '#333',
-    fontWeight: '400',
+  featureIcon: {
+    fontSize: '40px',
+    flexShrink: 0,
+  },
+  featureContent: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#212529',
+    margin: '0 0 6px 0',
+  },
+  featureDesc: {
+    fontSize: '14px',
+    color: '#6c757d',
+    margin: 0,
+    lineHeight: '1.4',
+  },
+  quickSection: {
+    marginTop: '20px',
+  },
+  sectionTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#495057',
+    marginBottom: '20px',
+    letterSpacing: '-0.3px',
+  },
+  quickGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '12px',
+  },
+  quickAction: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    padding: '20px 12px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: '10px',
+    cursor: 'pointer',
+    border: '1px solid #e9ecef',
+    transition: 'all 0.2s ease',
+  },
+  quickIcon: {
+    fontSize: '28px',
+  },
+  quickLabel: {
+    fontSize: '13px',
+    color: '#495057',
+    fontWeight: '500',
+    textAlign: 'center' as const,
   },
 }

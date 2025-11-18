@@ -1,32 +1,24 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-  ext {
-    // 🔧 Kotlin 버전을 모든 플러그인에 강제 적용
-    kotlinVersion = "2.0.21"
-  }
   repositories {
     google()
     mavenCentral()
   }
   dependencies {
-    // 🔧 AGP 버전 명시 (Gradle 8.13과 호환)
-    classpath('com.android.tools.build:gradle:8.7.3')
+    classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
   }
 }
 
-// 🔧 Monorepo: 프로젝트 루트 (apps/appdata) 설정
-def projectRoot = rootDir.getAbsoluteFile().getParentFile()
-
-// 🔧 React Native 플러그인에게 프로젝트 루트 경로 전달
-ext {
-  reactNativeProjectRoot = projectRoot.absolutePath
-}
-
-// 🔧 React Native Android 경로를 직접 지정 (monorepo 구조)
-def reactNativeAndroidDir = new File(projectRoot, "node_modules/react-native/android")
+def reactNativeAndroidDir = new File(
+  providers.exec {
+    workingDir(rootDir)
+    commandLine("node", "--print", "require.resolve('react-native/package.json')")
+  }.standardOutput.asText.get().trim(),
+  "../android"
+)
 
 allprojects {
   repositories {
@@ -41,5 +33,5 @@ allprojects {
   }
 }
 
-// 🔧 Expo 플러그인만 적용 (React Native rootproject 플러그인은 제외)
 apply plugin: "expo-root-project"
+apply plugin: "com.facebook.react.rootproject"
