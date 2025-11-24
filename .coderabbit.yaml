@@ -34,27 +34,27 @@ reviews:
     markdownlint:
       enabled: true
 
-  # 전체 프로젝트에 적용되는 일반 지침 (회사 코딩 규칙)
-  instructions: |
-    ## 공통 코딩 규칙
-    - 모든 함수와 클래스에 JSDoc 주석 작성
-    - TypeScript 타입 안정성 엄격히 준수 (any 사용 금지)
-    - console.log 대신 적절한 로깅 라이브러리 사용
-    - 에러 처리는 반드시 try-catch로 명시적으로 처리
-    - 비즈니스 로직과 UI 로직 분리
-
-    ## 보안 규칙
-    - 환경 변수에 민감한 정보 저장 (하드코딩 금지)
-    - SQL 쿼리는 반드시 parameterized query 사용
-    - 사용자 입력값은 항상 검증 및 sanitize
-
-    ## 성능 최적화
-    - 불필요한 re-render 방지 (React.memo, useMemo, useCallback 활용)
-    - 이미지는 최적화된 형식 사용 (Next.js Image 컴포넌트)
-    - API 호출 시 로딩/에러 상태 처리
-
-  # 경로별 특정 지침
+  # 경로별 코딩 규칙
   path_instructions:
+    # 전체 프로젝트 공통 규칙 (모든 파일에 적용)
+    - path: "**/*"
+      instructions: |
+        ## 공통 코딩 규칙
+        - 모든 함수와 클래스에 JSDoc 주석 작성
+        - TypeScript 타입 안정성 엄격히 준수 (any 사용 금지)
+        - console.log 대신 적절한 로깅 라이브러리 사용
+        - 에러 처리는 반드시 try-catch로 명시적으로 처리
+        - 비즈니스 로직과 UI 로직 분리
+
+        ## 보안 규칙
+        - 환경 변수에 민감한 정보 저장 (하드코딩 금지)
+        - SQL 쿼리는 반드시 parameterized query 사용
+        - 사용자 입력값은 항상 검증 및 sanitize
+
+        ## 성능 최적화
+        - 불필요한 re-render 방지 (React.memo, useMemo, useCallback 활용)
+        - 이미지는 최적화된 형식 사용 (Next.js Image 컴포넌트)
+        - API 호출 시 로딩/에러 상태 처리
     # TypeScript/JavaScript 파일
     - path: "**/*.ts,**/*.tsx,**/*.js,**/*.jsx"
       instructions: |
